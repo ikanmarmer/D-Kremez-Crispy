@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
 
 class Pengguna extends Model
 {
-    use HasFactory;
+    use HasFactory, HasApiTokens;
 
     protected $table = 'pengguna';
 
@@ -34,7 +35,7 @@ class Pengguna extends Model
 
     public function laporanPenjualan()
     {
-        return $this->hasMany(LaporanPenjualan::class, 'id_pengguna');
+        return $this->hasMany(LaporanPenjualan::class, 'id_karyawan');
     }
 
     public function testimoni()
