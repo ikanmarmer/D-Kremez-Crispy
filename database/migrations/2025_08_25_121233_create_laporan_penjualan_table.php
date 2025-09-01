@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('laporan_penjualan', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_pengguna')->constrained('pengguna')->onDelete('cascade');
+            $table->foreignId('id_users')->constrained('users');
             $table->date('tanggal_laporan');
             $table->decimal('total_omzet', 14, 2);
             $table->text('catatan')->nullable();
