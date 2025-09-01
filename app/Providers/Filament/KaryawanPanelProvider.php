@@ -26,8 +26,9 @@ class KaryawanPanelProvider extends PanelProvider
         return $panel
             ->id('karyawan')
             ->path('karyawan')
+            ->login()
             ->colors([
-                'primary' => Color::Red,
+                'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Karyawan/Resources'), for: 'App\Filament\Karyawan\Resources')
             ->discoverPages(in: app_path('Filament/Karyawan/Pages'), for: 'App\Filament\Karyawan\Pages')
