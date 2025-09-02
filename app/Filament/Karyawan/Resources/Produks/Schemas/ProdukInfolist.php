@@ -3,6 +3,7 @@
 namespace App\Filament\Karyawan\Resources\Produks\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -13,16 +14,17 @@ class ProdukInfolist
         return $schema
             ->components([
                 TextEntry::make('nama'),
-                TextEntry::make('kode_produk'),
                 TextEntry::make('harga')
                     ->numeric(),
-                TextEntry::make('satuan'),
+                TextEntry::make('stok')
+                    ->numeric(),
+                ImageEntry::make('image'),
+                TextEntry::make('dibuat_pada')
+                ->dateTime(),
+                TextEntry::make('diperbarui_pada')
+                ->dateTime(),
                 IconEntry::make('aktif')
                     ->boolean(),
-                TextEntry::make('dibuat_pada')
-                    ->dateTime(),
-                TextEntry::make('diperbarui_pada')
-                    ->dateTime(),
             ]);
     }
 }

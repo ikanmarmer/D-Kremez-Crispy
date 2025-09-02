@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Karyawan\Resources\RekapHarians\Tables;
+namespace App\Filament\Owner\Resources\RekapHarians\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -30,10 +30,6 @@ class RekapHariansTable
                 TextColumn::make('total_omzet')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('produk')
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

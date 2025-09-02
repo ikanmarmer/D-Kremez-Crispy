@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Karyawan\Resources\RekapHarians\Schemas;
+namespace App\Filament\Owner\Resources\RekapHarians\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;

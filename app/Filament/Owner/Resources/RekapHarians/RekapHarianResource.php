@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Karyawan\Resources\RekapHarians;
+namespace App\Filament\Owner\Resources\RekapHarians;
 
-use App\Filament\Karyawan\Resources\RekapHarians\Pages\CreateRekapHarian;
-use App\Filament\Karyawan\Resources\RekapHarians\Pages\EditRekapHarian;
-use App\Filament\Karyawan\Resources\RekapHarians\Pages\ListRekapHarians;
-use App\Filament\Karyawan\Resources\RekapHarians\Pages\ViewRekapHarian;
-use App\Filament\Karyawan\Resources\RekapHarians\Schemas\RekapHarianForm;
-use App\Filament\Karyawan\Resources\RekapHarians\Schemas\RekapHarianInfolist;
-use App\Filament\Karyawan\Resources\RekapHarians\Tables\RekapHariansTable;
+use App\Filament\Owner\Resources\RekapHarians\Pages\CreateRekapHarian;
+use App\Filament\Owner\Resources\RekapHarians\Pages\EditRekapHarian;
+use App\Filament\Owner\Resources\RekapHarians\Pages\ListRekapHarians;
+use App\Filament\Owner\Resources\RekapHarians\Pages\ViewRekapHarian;
+use App\Filament\Owner\Resources\RekapHarians\Schemas\RekapHarianForm;
+use App\Filament\Owner\Resources\RekapHarians\Schemas\RekapHarianInfolist;
+use App\Filament\Owner\Resources\RekapHarians\Tables\RekapHariansTable;
 use App\Models\RekapHarian;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -22,7 +22,7 @@ class RekapHarianResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'RekapHarian';
+    protected static ?string $recordTitleAttribute = 'Rekap Harian';
 
     public static function form(Schema $schema): Schema
     {
@@ -54,10 +54,5 @@ class RekapHarianResource extends Resource
             'view' => ViewRekapHarian::route('/{record}'),
             'edit' => EditRekapHarian::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 3;
     }
 }

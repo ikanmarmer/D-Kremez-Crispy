@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('rekap_harians', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_users')->constrained('users')->onDelete('cascade');
+            $table->foreignId('id_produk')->constrained('produk')->onDelete('cascade');
             $table->date('tanggal_rekap');
             $table->integer('jumlah_produk_terjual');
             $table->decimal('total_omzet', 14, 2);
-            $table->string('stok_tersedia');
             $table->timestamps();
         });
     }

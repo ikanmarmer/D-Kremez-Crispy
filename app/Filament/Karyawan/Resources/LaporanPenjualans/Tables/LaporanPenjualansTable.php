@@ -15,7 +15,10 @@ class LaporanPenjualansTable
     {
         return $table
             ->columns([
-                TextColumn::make('id_pengguna')
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable(),
+                TextColumn::make('id_users')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('tanggal_laporan')

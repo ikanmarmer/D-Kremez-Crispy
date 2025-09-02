@@ -18,7 +18,8 @@ class Produk extends Model
         'nama',
         'kode_produk',
         'harga',
-        'satuan',
+        'stok',
+        'image',
         'aktif',
     ];
 
@@ -37,5 +38,9 @@ class Produk extends Model
     public function pergerakanStok()
     {
         return $this->hasMany(PergerakanStok::class, 'id_produk');
+    }
+    public function rekapHarians()
+    {
+        return $this->hasMany(RekapHarian::class, 'id_produk');
     }
 }

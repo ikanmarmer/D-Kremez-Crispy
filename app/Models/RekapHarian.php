@@ -9,11 +9,9 @@ class RekapHarian extends Model
     protected $table = 'rekap_harians';
 
     protected $fillable = [
-        'id_users',
         'tanggal_rekap',
         'jumlah_produk_terjual',
         'total_omzet',
-        'stok_tersedia',
     ];
 
     public $timestamps = true;
@@ -26,5 +24,10 @@ class RekapHarian extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_users');
+    }
+
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class, 'id_produk');
     }
 }

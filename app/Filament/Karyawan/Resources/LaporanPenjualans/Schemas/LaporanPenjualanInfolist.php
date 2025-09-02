@@ -11,7 +11,7 @@ class LaporanPenjualanInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('id_pengguna')
+                TextEntry::make('id_users')
                     ->numeric(),
                 TextEntry::make('tanggal_laporan')
                     ->date(),
