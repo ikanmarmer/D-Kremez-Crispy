@@ -4,6 +4,7 @@ namespace App\Filament\Karyawan\Resources\RekapHarians\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 
 class RekapHarianForm
@@ -12,20 +13,19 @@ class RekapHarianForm
     {
         return $schema
             ->components([
-                TextInput::make('id_users')
+                TextInput::make('id_user')
                     ->required()
                     ->numeric(),
-                TextInput::make('id_produk')
-                    ->required()
-                    ->numeric(),
-                DatePicker::make('tanggal_rekap')
+                DatePicker::make('tanggal')
                     ->required(),
-                TextInput::make('jumlah_produk_terjual')
+                TextInput::make('total_produk_terjual')
                     ->required()
                     ->numeric(),
-                TextInput::make('total_omzet')
+                TextInput::make('omzet_harian')
                     ->required()
                     ->numeric(),
+                Textarea::make('sisa_stok')
+                    ->columnSpanFull(),
             ]);
     }
 }
