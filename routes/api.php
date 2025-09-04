@@ -19,14 +19,19 @@ use App\Http\Controllers\API\V1\PengaturanTampilanController;
 */
 
 // All routes under API V1
-Route::prefix('V1')->group(function () {
-
-    // Auth Routes
+Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
-        Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-        Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+        //oauth route
+        Route::get('/oauth/google', [AuthController::class, 'oAuthUrl']);
+        Route::get('/oauth/google/callback', [AuthController::class, 'oAuthCallback']);
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::get('/me', [AuthController::class, 'me']);
+            Route::post('/user/update', [AuthController::class, 'updateProfile']);
+            Route::post('/user/change-password', [AuthController::class, 'changePassword']);
+            Route::post('/logout', [AuthController::class, 'logout']);
+        });
     });
 
     // Protected Routes
