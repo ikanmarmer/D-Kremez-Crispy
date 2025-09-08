@@ -41,6 +41,10 @@ class Produk extends Model
     }
     public function rekapHarians()
     {
-        return $this->hasMany(RekapHarian::class, 'id_produk');
-    }
+        return $this->belongsToMany(RekapHarian::class, 'produk_rekap_harian')
+                    ->withPivot('stok')
+                    ->withTimestamps();
+        }
+
+
 }

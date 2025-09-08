@@ -15,6 +15,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class LaporanPenjualanResource extends Resource
 {
@@ -22,7 +24,7 @@ class LaporanPenjualanResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'LaporanPenjualan';
+    protected static ?string $recordTitleAttribute = 'Laporan Penjualan';
 
     public static function form(Schema $schema): Schema
     {
@@ -56,8 +58,23 @@ class LaporanPenjualanResource extends Resource
         ];
     }
 
+    public static function mutateFormDataBeforeCreate(array $data): array
+    {
+        Log::info('mutateFormDataBeforeCreate called', ['auth_id' => Auth::id(), 'data_before' => $data]);
+
+        $data['id_users'] = Auth::id();
+        return $data;
+    }
+
+    public static function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['id_users'] = Auth::id();
+        return $data;
+    }
+
     public static function getNavigationSort(): ?int
     {
         return 2;
     }
+
 }

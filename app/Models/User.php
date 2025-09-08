@@ -65,6 +65,11 @@ class User extends Authenticatable
         return $this->hasMany(Verifikasi::class, 'id_admin');
     }
 
+    public function rekapHarians()
+    {
+        return $this->hasMany(RekapHarian::class, 'id_users');
+    }
+
     /**
      * Get the attributes that should be cast.
      *
