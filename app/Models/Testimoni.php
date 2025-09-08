@@ -9,34 +9,19 @@ class Testimoni extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     protected $table = 'testimoni';
 
-    const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = 'diperbarui_pada';
-
     protected $fillable = [
-        'id_pelanggan',
-        'konten',
-        'penilaian',
-        'status',
-        'dimoderasi_oleh',
-        'dimoderasi_pada',
-    ];
+    'id_users',
+    'konten',
+    'penilaian',
+    'status',
+];
 
-    protected $casts = [
-        'penilaian' => 'integer',
-        'dimoderasi_pada' => 'datetime',
-        'dibuat_pada' => 'datetime',
-        'diperbarui_pada' => 'datetime',
-    ];
-
-    public function pelanggan()
-    {
-        return $this->belongsTo(Pengguna::class, 'id_pelanggan');
-    }
-
-    public function moderator()
-    {
-        return $this->belongsTo(Pengguna::class, 'dimoderasi_oleh');
-    }
+public function user()
+{
+    return $this->belongsTo(User::class, 'id_users');
+}
 }

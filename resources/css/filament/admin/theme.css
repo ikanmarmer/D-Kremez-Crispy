@@ -1,0 +1,36 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php';
+
+/* Custom styles untuk theme Dekremes */
+:root {
+    --primary-color: #8B4513; /* Coklat tua */
+    --secondary-color: #D2B48C; /* Coklat krem */
+}
+
+/* Custom header */
+.filament-main-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #A0522D 100%);
+}
+
+/* Custom sidebar */
+.filament-sidebar {
+    background: linear-gradient(to bottom, var(--primary-color) 0%, #A0522D 100%);
+}
+
+.filament-sidebar-group span {
+    color: #F5DEB3 !important;
+}
+
+/* Custom button */
+.filament-button-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.filament-button-primary:hover {
+    background-color: #A0522D;
+    border-color: #A0522D;
+}

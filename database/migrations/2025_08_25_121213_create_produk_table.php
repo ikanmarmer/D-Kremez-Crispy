@@ -13,10 +13,9 @@ return new class extends Migration
             $table->string('nama', 150);
             $table->string('kode_produk', 100)->unique();
             $table->decimal('harga', 12, 2);
-            $table->string('satuan', 50);
+            $table->string('stok', 50);
             $table->boolean('aktif')->default(true);
-            $table->timestamp('dibuat_pada')->useCurrent();
-            $table->timestamp('diperbarui_pada')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamps();
         });
     }
 

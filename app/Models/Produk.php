@@ -11,9 +11,6 @@ class Produk extends Model
 
     protected $table = 'produk';
 
-    const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = 'diperbarui_pada';
-
     protected $fillable = [
         'nama',
         'kode_produk',
@@ -28,14 +25,4 @@ class Produk extends Model
         'dibuat_pada' => 'datetime',
         'diperbarui_pada' => 'datetime',
     ];
-
-    public function detailLaporanPenjualan()
-    {
-        return $this->hasMany(DetailLaporanPenjualan::class, 'id_produk');
-    }
-
-    public function pergerakanStok()
-    {
-        return $this->hasMany(PergerakanStok::class, 'id_produk');
-    }
 }
