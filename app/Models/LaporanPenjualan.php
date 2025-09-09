@@ -11,12 +11,11 @@ class LaporanPenjualan extends Model
 
     protected $table = 'laporan_penjualan';
 
-    const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = 'diperbarui_pada';
-
     protected $fillable = [
+        'id_users',
         'tanggal_laporan',
-        'total_omzet',
+        'total_produk_terjual',
+        'omzet',
         'catatan',
         'status',
         'dikirim_pada',
@@ -25,16 +24,14 @@ class LaporanPenjualan extends Model
 
     protected $casts = [
         'tanggal_laporan' => 'date',
-        'total_omzet' => 'decimal:2',
+        'omzet' => 'decimal:2',
         'dikirim_pada' => 'datetime',
         'disetujui_pada' => 'datetime',
-        'dibuat_pada' => 'datetime',
-        'diperbarui_pada' => 'datetime',
     ];
 
-    public function pengguna()
+    public function user()
     {
-        return $this->belongsTo(Pengguna::class, 'id_pengguna');
+        return $this->belongsTo(User::class, 'id_users');
     }
 
     public function detailLaporan()

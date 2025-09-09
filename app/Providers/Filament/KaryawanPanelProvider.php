@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Karyawan\Pages\Auth\LoginCustom;
 
 class KaryawanPanelProvider extends PanelProvider
 {
@@ -26,7 +27,7 @@ class KaryawanPanelProvider extends PanelProvider
         return $panel
             ->id('karyawan')
             ->path('karyawan')
-            ->login()
+            ->login(LoginCustom::class)
             ->colors([
                 'primary' => Color::Amber,
             ])

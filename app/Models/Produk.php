@@ -11,9 +11,6 @@ class Produk extends Model
 
     protected $table = 'produk';
 
-    const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = 'diperbarui_pada';
-
     protected $fillable = [
         'nama',
         'kode_produk',
@@ -41,6 +38,10 @@ class Produk extends Model
     }
     public function rekapHarians()
     {
-        return $this->hasMany(RekapHarian::class, 'id_produk');
-    }
+        return $this->belongsToMany(RekapHarian::class, 'produk_rekap_harian')
+                    ->withPivot('stok')
+                    ->withTimestamps();
+        }
+
+
 }

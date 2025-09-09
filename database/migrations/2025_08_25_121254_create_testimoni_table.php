@@ -13,9 +13,8 @@ return new class extends Migration
             $table->foreignId('id_users')->constrained('users')->onDelete('cascade');
             $table->text('konten');
             $table->tinyInteger('penilaian');
-            $table->enum('status', ['menunggu', 'disetujui', 'ditolak'])->default('menunggu');
-            $table->timestamp('dibuat_pada')->useCurrent();
-            $table->timestamp('diperbarui_pada')->useCurrent()->useCurrentOnUpdate();
+            $table->string('status')->default('Menunggu');
+            $table->timestamps();
         });
     }
 
