@@ -10,6 +10,8 @@ class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected static ?string $title = 'Detail Pengguna';
+
     protected function getHeaderActions(): array
     {
         return [

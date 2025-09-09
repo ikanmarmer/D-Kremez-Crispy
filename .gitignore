@@ -22,3 +22,10 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+composer.lock.bak
+composer.json.bak
+.vscode
+lang/id/
+resources/views/test-api.blade.php
+resources/views/welcome.blade.php
+app/Http/Controllers/TestAPIController.php
