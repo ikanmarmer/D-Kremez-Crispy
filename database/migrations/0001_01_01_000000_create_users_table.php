@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -16,7 +17,6 @@ return new class extends Migration
             $table->string('role', )->default('User');
             $table->string('avatar')->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
             $table->rememberToken();
             $table->timestamps();
         });
