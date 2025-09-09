@@ -15,33 +15,18 @@ class RekapHariansTable
     {
         return $table
             ->columns([
-                TextColumn::make('id_users')
+                TextColumn::make('id_user')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('id_produk')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('tanggal_rekap')
+                TextColumn::make('tanggal')
                     ->date()
                     ->sortable(),
-                TextColumn::make('jumlah_produk_terjual')
+                TextColumn::make('total_produk_terjual')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('total_omzet')
+                TextColumn::make('omzet_harian')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('produk')
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

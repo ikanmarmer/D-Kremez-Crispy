@@ -14,8 +14,8 @@ class RekapHarian extends Model
         'total_omzet',
     ];
 
-    public $timestamps = true;
-
+    public $timestamps = false;
+    
     protected $casts = [
         'tanggal_rekap' => 'date',
         'total_omzet' => 'decimal:2',
