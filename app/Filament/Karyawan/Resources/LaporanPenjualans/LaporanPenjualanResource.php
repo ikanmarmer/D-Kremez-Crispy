@@ -22,6 +22,8 @@ class LaporanPenjualanResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $recordTitleAttribute = 'LaporanPenjualan';
+
     public static function form(Schema $schema): Schema
     {
         return LaporanPenjualanForm::configure($schema);
@@ -53,6 +55,7 @@ class LaporanPenjualanResource extends Resource
             'edit' => EditLaporanPenjualan::route('/{record}/edit'),
         ];
     }
+
     public static function getNavigationSort(): ?int
     {
         return 2;

@@ -15,7 +15,6 @@ class LaporanPenjualan extends Model
     const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
-        'id_pengguna',
         'tanggal_laporan',
         'total_omzet',
         'catatan',

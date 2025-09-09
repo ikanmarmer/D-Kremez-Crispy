@@ -15,7 +15,8 @@ class Produk extends Model
         'nama',
         'kode_produk',
         'harga',
-        'satuan',
+        'stok',
+        'image',
         'aktif',
     ];
 
@@ -25,4 +26,9 @@ class Produk extends Model
         'dibuat_pada' => 'datetime',
         'diperbarui_pada' => 'datetime',
     ];
+    
+    public function pergerakanStok()
+    {
+        return $this->hasMany(PergerakanStok::class, 'id_produk');
+    }
 }

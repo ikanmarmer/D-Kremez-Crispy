@@ -16,7 +16,6 @@ class User extends Authenticatable implements FilamentUser
     use HasFactory,HasApiTokens, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
      *
      * @var list<string>
      */
@@ -46,13 +45,11 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
 
     /**
-     * Get the user's role as a Role enum.
      *
      * @return Role
      */
@@ -69,7 +66,6 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * The attributes that should be hidden for serialization.
      *
      * @var list<string>
      */

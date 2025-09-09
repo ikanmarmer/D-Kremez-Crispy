@@ -15,6 +15,12 @@ class RekapHariansTable
     {
         return $table
             ->columns([
+                TextColumn::make('id_users')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('id_produk')
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('tanggal_rekap')
                     ->date()
                     ->sortable(),
@@ -24,8 +30,10 @@ class RekapHariansTable
                 TextColumn::make('total_omzet')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('stok_tersedia')
-                    ->searchable(),
+                TextColumn::make('produk')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

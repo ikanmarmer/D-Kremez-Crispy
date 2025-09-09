@@ -11,11 +11,12 @@ return new class extends Migration
         Schema::create('produk', function (Blueprint $table) {
             $table->id();
             $table->string('nama', 150);
-            $table->string('kode_produk', 100)->unique();
             $table->decimal('harga', 12, 2);
-            $table->string('stok', 50);
+            $table->integer('stok')->default(0);
+            $table->string('image')->nullable();
+            $table->timestamp('dibuat_pada')->useCurrent();
+            $table->timestamp('diperbarui_pada')->useCurrent()->useCurrentOnUpdate();
             $table->boolean('aktif')->default(true);
-            $table->timestamps();
         });
     }
 

@@ -22,7 +22,7 @@ class RekapHarianResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'Rekap Harian';
+    protected static ?string $recordTitleAttribute = 'RekapHarian';
 
     public static function form(Schema $schema): Schema
     {
@@ -55,6 +55,7 @@ class RekapHarianResource extends Resource
             'edit' => EditRekapHarian::route('/{record}/edit'),
         ];
     }
+
     public static function getNavigationSort(): ?int
     {
         return 3;

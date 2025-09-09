@@ -15,7 +15,7 @@ class LaporanPenjualanForm
     {
         return $schema
             ->components([
-                TextInput::make('id_pengguna')
+                TextInput::make('id_users')
                     ->required()
                     ->numeric(),
                 DatePicker::make('tanggal_laporan')

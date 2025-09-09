@@ -15,6 +15,9 @@ class RekapHarianForm
                 TextInput::make('id_users')
                     ->required()
                     ->numeric(),
+                TextInput::make('id_produk')
+                    ->required()
+                    ->numeric(),
                 DatePicker::make('tanggal_rekap')
                     ->required(),
                 TextInput::make('jumlah_produk_terjual')
@@ -23,8 +26,6 @@ class RekapHarianForm
                 TextInput::make('total_omzet')
                     ->required()
                     ->numeric(),
-                TextInput::make('stok_tersedia')
-                    ->required(),
             ]);
     }
 }

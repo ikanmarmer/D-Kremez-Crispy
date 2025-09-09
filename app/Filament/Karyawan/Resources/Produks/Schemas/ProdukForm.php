@@ -3,6 +3,7 @@
 namespace App\Filament\Karyawan\Resources\Produks\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -15,19 +16,21 @@ class ProdukForm
             ->components([
                 TextInput::make('nama')
                     ->required(),
-                TextInput::make('kode_produk')
-                    ->required(),
                 TextInput::make('harga')
                     ->required()
                     ->numeric(),
-                TextInput::make('satuan')
+                TextInput::make('stok')
+                    ->required()
+                    ->numeric()
+                    ->default(0),
+                FileUpload::make('image')
+                    ->image(),
+                    DateTimePicker::make('dibuat_pada')
                     ->required(),
-                Toggle::make('aktif')
+                    DateTimePicker::make('diperbarui_pada')
                     ->required(),
-                DateTimePicker::make('dibuat_pada')
-                    ->required(),
-                DateTimePicker::make('diperbarui_pada')
-                    ->required(),
+                    Toggle::make('aktif')
+                        ->required(),
             ]);
     }
 }

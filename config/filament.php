@@ -131,4 +131,14 @@ return [
     */
 
     'system_route_prefix' => 'filament',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Middleware
+    |--------------------------------------------------------------------------
+    |
+    | You may configure the middleware stack used by Filament here.
+    |
+    |
+    */
 ];
