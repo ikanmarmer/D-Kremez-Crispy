@@ -9,19 +9,40 @@ class Testimoni extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
-
     protected $table = 'testimoni';
 
     protected $fillable = [
-    'id_users',
-    'konten',
-    'penilaian',
-    'status',
-];
+        'user_id',
+        'komentar',
+        'rating',
+        'status',
+        'umpan_balik_admin'
+    ];
 
-public function user()
-{
-    return $this->belongsTo(User::class, 'id_users');
-}
+    protected $casts = [
+        'rating' => 'integer',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    // Scope untuk testimoni yang disetujui
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'disetujui');
+    }
+
+    // Scope untuk testimoni yang menunggu
+    public function scopePending($query)
+    {
+        return $query->where('status', 'menunggu');
+    }
+
+    // Cek apakah user sudah memberikan testimoni
+    public static function userHasTestimonial($userId)
+    {
+        return static::where('user_id', $userId)->exists();
+    }
 }

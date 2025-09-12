@@ -9,12 +9,14 @@ return new class extends Migration
     public function up()
     {
         Schema::create('testimoni', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('id_users')->constrained('users')->onDelete('cascade');
-            $table->text('konten');
-            $table->tinyInteger('penilaian');
-            $table->string('status')->default('Menunggu');
-            $table->timestamps();
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->text('komentar');
+                $table->integer('rating');
+                $table->string('status')->default('menunggu');
+                $table->text('umpan_balik_admin')->nullable();
+                $table->timestamps();
+
         });
     }
 
