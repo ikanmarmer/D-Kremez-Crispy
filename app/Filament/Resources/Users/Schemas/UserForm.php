@@ -31,13 +31,13 @@ class UserForm
                     ->required(fn (string $context): bool => $context === 'create')
                     ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
                     ->dehydrated(fn (string $context): bool => $context === 'create')
+                    ->nullable(fn (string $context): bool => $context === 'edit')
                     ->minLength(8),
                 Select::make('role')
                     ->label('Role')
                     ->placeholder('Pilih role')
                     ->options(options: [
                         'User' => Role::User->value,
-                        'Owner' => Role::Owner->value,
                         'Admin' => Role::Admin->value,
                         'Karyawan' => Role::Karyawan->value,
                     ])

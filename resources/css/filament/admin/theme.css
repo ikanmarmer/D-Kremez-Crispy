@@ -4,33 +4,43 @@
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php';
 
-/* Custom styles untuk theme Dekremes */
-:root {
-    --primary-color: #8B4513; /* Coklat tua */
-    --secondary-color: #D2B48C; /* Coklat krem */
+a, button {
+  transition: all 0.2s ease-in-out;
 }
 
-/* Custom header */
-.filament-main-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #A0522D 100%);
+button:hover, a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Custom sidebar */
-.filament-sidebar {
-    background: linear-gradient(to bottom, var(--primary-color) 0%, #A0522D 100%);
+.filament-button {
+  background-color: var(--filament-primary-color);
+  color: #FFFFFF;
+  border-radius: 8px;
+  transition: background-color 0.3s ease-in-out;
 }
 
-.filament-sidebar-group span {
-    color: #F5DEB3 !important;
+.filament-button:hover {
+  background-color: var(--filament-accent-color);
 }
 
-/* Custom button */
-.filament-button-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+.filament-card {
+  transition: transform 0.3s ease-in-out;
 }
 
-.filament-button-primary:hover {
-    background-color: #A0522D;
-    border-color: #A0522D;
+.filament-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
+
+.filament-form-field input,
+.filament-form-field select {
+  transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.filament-form-field input:focus,
+.filament-form-field select:focus {
+  border-color: var(--filament-highlight-color);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.5);
+}
+

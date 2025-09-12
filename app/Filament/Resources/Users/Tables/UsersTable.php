@@ -29,7 +29,7 @@ class UsersTable
                     ->disk('public')
                     ->label('Avatar')
                     ->placeholder('Belum ada avatar')
-                    ->width('100%'),
+                    ->extraImgAttributes(['style' => 'border-radius: 10px;']),
                 TextColumn::make('email_verified_at')
                     ->label('Diverifikasi pada')
                     ->dateTime()
