@@ -11,14 +11,20 @@ class RekapHarianInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('id_user')
+                TextEntry::make('user.name')
+                    ->label('nama karyawan')
                     ->numeric(),
                 TextEntry::make('tanggal')
                     ->date(),
                 TextEntry::make('total_produk_terjual')
                     ->numeric(),
-                TextEntry::make('omzet_harian')
+                TextEntry::make('total_omzet')
                     ->numeric(),
+                TextEntry::make('produk_terlaris'),
+                TextEntry::make('created_at')
+                    ->dateTime(),
+                TextEntry::make('updated_at')
+                    ->dateTime(),
             ]);
     }
 }

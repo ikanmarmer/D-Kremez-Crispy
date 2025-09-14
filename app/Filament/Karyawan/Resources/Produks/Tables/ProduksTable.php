@@ -24,7 +24,8 @@ class ProduksTable
                     ->searchable(),
                 TextColumn::make('harga')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->money('idr', true),
                 TextColumn::make('stok')
                     ->numeric()
                     ->sortable(),

@@ -15,31 +15,34 @@ class LaporanPenjualansTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->sortable(),
-                TextColumn::make('id_users')
+                TextColumn::make('user.name')
+                    ->label('nama karyawan')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('tanggal_laporan')
                     ->date()
                     ->sortable(),
-                TextColumn::make('total_omzet')
+                TextColumn::make('total_produk_terjual')
+                    ->searchable(),
+                TextColumn::make('omzet')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status'),
+
                 TextColumn::make('dikirim_pada')
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('disetujui_pada')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('dibuat_pada')
+                TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable(),
-                TextColumn::make('diperbarui_pada')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

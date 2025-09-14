@@ -35,6 +35,12 @@ class User extends Authenticatable implements FilamentUser
         'password',
     ];
 
+
+    /**
+     * Get the attributes that should be cast.
+    *
+    * @return array<string, string>
+    */
     protected function casts(): array
     {
         return [
@@ -67,10 +73,15 @@ class User extends Authenticatable implements FilamentUser
     /**
      *
      * @var list<string>
-     */
+    */
 
     public function testimoni()
     {
         return $this->hasMany(Testimoni::class, 'id_users');
+    }
+
+    public function rekapHarians()
+    {
+        return $this->hasMany(RekapHarian::class, 'id_users');
     }
 }

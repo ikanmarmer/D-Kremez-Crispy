@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\API\V1;
 
 use App\Models\User;
 use App\Enums\Role;
@@ -10,45 +10,68 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Validator;
-use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
+    private function formatUserResponse(User $user)
+    {
+        $avatarUrl = $user->avatar ? URL::to(Storage::url($user->avatar)) : null;
+
+        return array_merge(
+            $user->only(['id', 'name', 'email', 'role', 'created_at', 'updated_at']),
+            ['avatar' => $user->avatar, 'avatar_url' => $avatarUrl]
+        );
+    }
+
+    private function uploadAvatar(Request $request): ?string
+    {
+        if (!$request->hasFile('avatar')) {
+            return null;
+        }
+
+        return $request->file('avatar')->store('avatars', 'public');
+    }
+
+    private function deleteAvatarFile(?string $avatarPath): void
+    {
+        if ($avatarPath) {
+            Storage::disk('public')->delete($avatarPath);
+        }
+    }
+
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif'
+            'avatar'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
         ]);
 
-        $avatarPath = $this->uploadAvatar($request);
-
         $user = User::create([
-            ...$validated,
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => Role::User,
-            'avatar' => $avatarPath
+            'role'     => Role::User,
+            'avatar'   => $this->uploadAvatar($request),
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'User registered successfully',
+            'message'      => 'User registered successfully',
             'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user
+            'token_type'   => 'Bearer',
+            'user'         => $this->formatUserResponse($user),
         ], 201);
     }
-
 
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
+            'email'    => 'required|email',
+            'password' => 'required',
         ]);
 
         if (!Auth::attempt($credentials)) {
@@ -59,39 +82,24 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Login successful',
+            'message'      => 'Login successful',
             'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user
+            'token_type'   => 'Bearer',
+            'user'         => $this->formatUserResponse($user),
         ]);
     }
 
-
     public function logout(Request $request)
     {
-        $user = $request->user();
+        $request->user()->currentAccessToken()->delete();
 
-        if ($user->currentAccessToken() instanceof PersonalAccessToken) {
-            $user->currentAccessToken()->delete();
-            return response()->json(['message' => 'Logged out successfully (Token Deleted)']);
-        }
-
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json(['message' => 'Logged out successfully (Session Invalidated)']);
+        return response()->json(['message' => 'Logged out successfully']);
     }
-
 
     public function profile(Request $request)
     {
-        $user = $request->user();
-        $avatarUrl = $user->avatar ? URL::to(Storage::url($user->avatar)) : null;
-
         return response()->json([
-            'user' => $user,
-            'avatar_url' => $avatarUrl,
+            'user' => $this->formatUserResponse($request->user()),
         ]);
     }
 
@@ -100,52 +108,39 @@ class AuthController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
+            'name'     => 'sometimes|string|max:255',
+            'email'    => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user)],
             'password' => 'nullable|string|min:8|confirmed',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp'
+            'avatar'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
         ]);
 
+        $data = $request->only('name', 'email');
+
         if ($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            $this->deleteAvatarFile($user->avatar);
+            $data['avatar'] = $this->uploadAvatar($request);
         }
 
         if ($request->filled('password')) {
-            $validated['password'] = Hash::make($request->password);
-        } else {
-            unset($validated['password']);
+            $data['password'] = Hash::make($request->password);
         }
 
-        $user->update($validated);
+        $user->update($data);
 
         return response()->json([
             'message' => 'Profile updated successfully',
-            'user' => $user
+            'user'    => $this->formatUserResponse($user),
         ]);
     }
-
-
-    private function uploadAvatar(Request $request)
-    {
-        if (!$request->hasFile('avatar')) {
-            return null;
-        }
-
-        $file = $request->file('avatar');
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        return $file->storeAs('avatars', $filename, 'public');
-    }
-
 
     public function deleteAvatar(Request $request)
     {
         $user = $request->user();
 
         if ($user->avatar) {
-            Storage::disk('public')->delete($user->avatar);
+            $this->deleteAvatarFile($user->avatar);
             $user->update(['avatar' => null]);
+
             return response()->json(['message' => 'Avatar deleted successfully']);
         }
 

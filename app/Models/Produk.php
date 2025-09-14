@@ -26,9 +26,22 @@ class Produk extends Model
         'dibuat_pada' => 'datetime',
         'diperbarui_pada' => 'datetime',
     ];
-    
+
+    public function detailLaporanPenjualan()
+    {
+        return $this->hasMany(DetailLaporanPenjualan::class, 'id_produk');
+    }
+
     public function pergerakanStok()
     {
         return $this->hasMany(PergerakanStok::class, 'id_produk');
     }
+    public function rekapHarians()
+    {
+        return $this->belongsToMany(RekapHarian::class, 'produk_rekap_harian')
+                    ->withPivot('stok')
+                    ->withTimestamps();
+        }
+
+
 }

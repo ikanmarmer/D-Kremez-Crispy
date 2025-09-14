@@ -6,19 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class RekapHarian extends Model
 {
-    protected $table = 'rekap_harians';
-
     protected $fillable = [
-        'tanggal_rekap',
-        'jumlah_produk_terjual',
+        'id_users',
+        'tanggal',
+        'total_produk_terjual',
         'total_omzet',
-    ];
-
-    public $timestamps = false;
-    
-    protected $casts = [
-        'tanggal_rekap' => 'date',
-        'total_omzet' => 'decimal:2',
+        'produk_terlaris',
+        'catatan',
     ];
 
     public function user()
@@ -26,8 +20,16 @@ class RekapHarian extends Model
         return $this->belongsTo(User::class, 'id_users');
     }
 
-    public function produk()
+    public function produks()
     {
-        return $this->belongsTo(Produk::class, 'id_produk');
+        return $this->belongsToMany(Produk::class, 'produk_rekap_harian')
+            ->withPivot('stok')
+            ->withTimestamps();
+    }
+
+    public function ProdukRekapHarian()
+    {
+        return $this->hasMany(ProdukRekapHarian::class);
     }
 }
+

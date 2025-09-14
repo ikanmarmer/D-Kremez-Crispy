@@ -9,4 +9,4 @@ Route::get('/', function () {
 });
 
 
-Route::get('/test-api', [TestAPIController::class, 'showTestPage']);
+// Route::get('/test-api', [TestAPIController::class, 'showTestPage']);

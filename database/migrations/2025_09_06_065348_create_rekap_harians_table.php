@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('rekap_harians', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('id_users')->constrained('users');
+            $table->date('tanggal');
+            $table->integer('total_produk_terjual')->default(0);
+            $table->decimal('total_omzet', 14, 2)->default(0);
+            $table->string('produk_terlaris')->nullable();
+            $table->text('catatan')->nullable();
+            $table->timestamps();
+        });
+
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('rekap_harians');
+    }
+};
