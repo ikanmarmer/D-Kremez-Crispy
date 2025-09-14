@@ -15,9 +15,6 @@ use App\Enums\Role;
 
 class AuthController extends Controller
 {
-    /**
-     * Helper untuk format data user agar selalu ada avatar_url
-     */
     private function formatUserResponse(User $user)
     {
         $relativeUrl = $user->avatar ? Storage::url($user->avatar) : null;
@@ -35,9 +32,6 @@ class AuthController extends Controller
         ];
     }
 
-    /**
-     * Register user baru
-     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -54,7 +48,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $avatarPath = $this->uploadAvatar($request);
+        $avatarPath = $this->uploadAvatarFile($request);
 
         $user = User::create([
             'name'     => $request->name,
@@ -74,9 +68,6 @@ class AuthController extends Controller
         ], 201);
     }
 
-    /**
-     * Login user
-     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -101,12 +92,9 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Logout user
-     */
     public function logout(Request $request)
     {
-        if ($request->user()->currentAccessToken() instanceof PersonalAccessToken) {
+        if ($request->user() && $request->user()->currentAccessToken()) {
             $request->user()->currentAccessToken()->delete();
             return response()->json([
                 'message' => 'Logged out successfully (Token Deleted)'
@@ -122,9 +110,6 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Get user profile
-     */
     public function profile(Request $request)
     {
         return response()->json([
@@ -132,17 +117,14 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Update user profile
-     */
+    // PERBAIKAN: Hapus validasi email yang tidak diperlukan
     public function updateProfile(Request $request)
     {
         $user = $request->user();
 
         $validator = Validator::make($request->all(), [
             'name'   => 'sometimes|string|max:255',
-            'email'  => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif'
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         if ($validator->fails()) {
@@ -168,8 +150,7 @@ class AuthController extends Controller
             $validatedData['avatar'] = $avatarPath;
         }
 
-        $user->fill($validatedData);
-        $user->save();
+        $user->update($validatedData);
 
         return response()->json([
             'message' => 'Profile updated successfully',
@@ -177,26 +158,40 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Upload avatar helper
-     */
-    private function uploadAvatar(Request $request)
+    public function uploadAvatarEndpoint(Request $request)
     {
-        if (!$request->hasFile('avatar')) {
-            return null;
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors()
+            ], 422);
         }
 
-        $file = $request->file('avatar');
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
 
-        $path = $file->storeAs('avatars', $filename, 'public');
+        $avatarPath = $request->file('avatar')->storeAs(
+            'avatars',
+            time() . '_' . uniqid() . '.' . $request->file('avatar')->getClientOriginalExtension(),
+            'public'
+        );
 
-        return $path;
+        $user->avatar = $avatarPath;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Avatar uploaded successfully',
+            'user'    => $this->formatUserResponse($user)
+        ]);
     }
 
-    /**
-     * Delete avatar
-     */
     public function deleteAvatar(Request $request)
     {
         $user = $request->user();
@@ -216,5 +211,49 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'No avatar to delete'
         ], 404);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'Current password is incorrect'
+            ], 422);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password changed successfully'
+        ]);
+    }
+
+    private function uploadAvatarFile(Request $request)
+    {
+        if (!$request->hasFile('avatar')) {
+            return null;
+        }
+
+        $file = $request->file('avatar');
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+        $path = $file->storeAs('avatars', $filename, 'public');
+
+        return $path;
     }
 }
