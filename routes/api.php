@@ -2,24 +2,33 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\V1\AuthController;
+use App\Http\Controllers\API\V1\TestimoniController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('V1')->group(function () {
-    Route::prefix('auth')->group(function () {
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/login', [AuthController::class, 'login']);
-        Route::middleware(['auth:sanctum'])->group(function () {
-            Route::post('/logout', [AuthController::class, 'logout']);
-            Route::get('/profile', [AuthController::class, 'profile']);
-            Route::put('/profile', [AuthController::class, 'updateProfile']);
-            Route::post('/upload-avatar', [AuthController::class, 'uploadAvatarEndpoint']);
-            Route::delete('/avatar', [AuthController::class, 'deleteAvatar']);
-            Route::post('/change-password', [AuthController::class, 'changePassword']);
+    Route::prefix('auth')
+        ->controller(AuthController::class)
+        ->group(function () {
+            Route::post('/register', 'register');
+            Route::post('/login', 'login');
+            Route::get('/oauth/google', 'oAuthUrl');
+            Route::get('/oauth/google/callback', 'oAuthCallback');
+            Route::middleware('auth:sanctum')->group(function () {
+                Route::post('/logout', 'logout');
+                Route::get('/profile', 'profile');
+                Route::post('/update-profile', 'updateProfile');
+                Route::post('/upload-avatar', 'uploadAvatar');
+                Route::delete('/avatar', 'deleteAvatar');
+            });
         });
-    });
+    Route::prefix('testimonials')
+        ->controller(TestimoniController::class)
+        ->group(function () {
+            Route::get('/', 'getApprovedTestimonials');
+            Route::middleware('auth:sanctum')->post('/', 'submitTestimonial');
+        });
 });
