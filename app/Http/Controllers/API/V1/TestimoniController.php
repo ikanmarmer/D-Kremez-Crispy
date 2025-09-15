@@ -46,35 +46,64 @@ class TestimoniController extends Controller
     }
 
     public function submitTestimonial(Request $request)
-    {
-        $user = $request->user();
+{
+    $user = $request->user();
 
-        if ($user->testimonial()->exists()) {
+    $validated = $request->validate([
+        'rating' => 'required|numeric|min:1|max:5',
+        'content' => 'required|string|max:1000',
+        'product_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+    ]);
+
+    // cek apakah user sudah pernah buat testimoni
+    $testimoni = $user->testimonial()->first();
+
+    if ($testimoni) {
+        if ($testimoni->status === Status::Menunggu) {
             return response()->json([
-                'message' => "You have already submitted a testimonial you can't do it again."
+                'message' => 'Anda sudah mengirim testimoni dan masih menunggu verifikasi.'
             ], 409);
         }
 
-        $validated = $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-            'content' => 'required|string|max:1000',
-            'product_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
-        ]);
+        // update testimoni lama kalau sudah Disetujui atau Ditolak
+        if ($request->hasFile('product_photo')) {
+            // hapus foto lama kalau ada
+            if ($testimoni->product_photo) {
+                Storage::disk('public')->delete($testimoni->product_photo);
+            }
+            $testimoni->product_photo = $request->file('product_photo')->store('testimonials/product-photos', 'public');
+        }
 
-        $productPhotoPath = $request->file('product_photo')->store('testimonials/product-photos', 'public');
-
-        $testimonial = $user->testimonial()->create([
-            'name' => $user->name,
-            'avatar' => $user->avatar,
+        $testimoni->update([
             'rating' => $validated['rating'],
             'content' => $validated['content'],
-            'product_photo' => $productPhotoPath,
-            'status' => Status::Menunggu
+            'status' => Status::Menunggu, // balik ke menunggu setelah edit
         ]);
 
         return response()->json([
-            'message' => 'Testimonial submitted successfully. It is now awaiting approval.',
-            'testimonial' => $this->formatTestimonial($testimonial),
-        ], 201);
+            'message' => 'Testimoni berhasil diperbarui dan menunggu verifikasi.',
+            'testimonial' => $this->formatTestimonial($testimoni),
+        ], 200);
     }
+
+    // kalau belum ada sama sekali → buat baru
+    $productPhotoPath = $request->hasFile('product_photo')
+        ? $request->file('product_photo')->store('testimonials/product-photos', 'public')
+        : null;
+
+    $testimonial = $user->testimonial()->create([
+        'name' => $user->name,
+        'avatar' => $user->avatar,
+        'rating' => $validated['rating'],
+        'content' => $validated['content'],
+        'product_photo' => $productPhotoPath,
+        'status' => Status::Menunggu
+    ]);
+
+    return response()->json([
+        'message' => 'Testimoni berhasil dikirim dan menunggu verifikasi.',
+        'testimonial' => $this->formatTestimonial($testimonial),
+    ], 201);
+}
+
 }
