@@ -4,23 +4,26 @@ namespace App\Http\Controllers\API\V1;
 
 use App\Models\User;
 use App\Enums\Role;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
+use App\Http\Controllers\Controller;
 
 class AuthController extends Controller
 {
-    private function formatUserResponse(User $user)
+    private function formatUserResponse(User $user): array
     {
         $avatarUrl = $user->avatar ? URL::to(Storage::url($user->avatar)) : null;
 
         return array_merge(
             $user->only(['id', 'name', 'email', 'role', 'created_at', 'updated_at']),
-            ['avatar' => $user->avatar, 'avatar_url' => $avatarUrl]
+            [
+                'avatar' => $user->avatar,
+                'avatar_url' => $avatarUrl,
+            ]
         );
     }
 
@@ -43,49 +46,49 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'avatar'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
         ]);
 
         $user = User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
+            'name' => $validated['name'],
+            'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role'     => Role::User,
-            'avatar'   => $this->uploadAvatar($request),
+            'role' => Role::User,
+            'avatar' => $this->uploadAvatar($request),
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message'      => 'User registered successfully',
+            'message' => 'Pendaftaran pengguna berhasil',
             'access_token' => $token,
-            'token_type'   => 'Bearer',
-            'user'         => $this->formatUserResponse($user),
+            'token_type' => 'Bearer',
+            'user' => $this->formatUserResponse($user),
         ], 201);
     }
 
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
         if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Invalid login credentials'], 401);
+            return response()->json(['message' => 'Email atau kata sandi salah'], 401);
         }
 
         $user = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message'      => 'Login successful',
+            'message' => 'Berhasil masuk',
             'access_token' => $token,
-            'token_type'   => 'Bearer',
-            'user'         => $this->formatUserResponse($user),
+            'token_type' => 'Bearer',
+            'user' => $this->formatUserResponse($user),
         ]);
     }
 
@@ -93,7 +96,7 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out successfully']);
+        return response()->json(['message' => 'Berhasil keluar']);
     }
 
     public function profile(Request $request)
@@ -108,10 +111,10 @@ class AuthController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'name'     => 'sometimes|string|max:255',
-            'email'    => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user)],
+            'name' => 'sometimes|string|max:255',
+            'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user)],
             'password' => 'nullable|string|min:8|confirmed',
-            'avatar'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
         ]);
 
         $data = $request->only('name', 'email');
@@ -121,15 +124,15 @@ class AuthController extends Controller
             $data['avatar'] = $this->uploadAvatar($request);
         }
 
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
+        if (!empty($validated['password'])) {
+            $data['password'] = Hash::make($validated['password']);
         }
 
         $user->update($data);
 
         return response()->json([
-            'message' => 'Profile updated successfully',
-            'user'    => $this->formatUserResponse($user),
+            'message' => 'Profil berhasil diperbarui',
+            'user' => $this->formatUserResponse($user),
         ]);
     }
 
@@ -141,9 +144,9 @@ class AuthController extends Controller
             $this->deleteAvatarFile($user->avatar);
             $user->update(['avatar' => null]);
 
-            return response()->json(['message' => 'Avatar deleted successfully']);
+            return response()->json(['message' => 'Avatar berhasil dihapus']);
         }
 
-        return response()->json(['message' => 'No avatar to delete'], 404);
+        return response()->json(['message' => 'Tidak ada avatar untuk dihapus'], 404);
     }
 }

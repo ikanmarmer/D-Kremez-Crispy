@@ -2,10 +2,8 @@
 
 namespace App\Filament\Resources\Testimonis;
 
-use App\Filament\Resources\Testimonis\Pages\CreateTestimoni;
-use App\Filament\Resources\Testimonis\Pages\EditTestimoni;
 use App\Filament\Resources\Testimonis\Pages\ListTestimonis;
-use App\Filament\Resources\Testimonis\Schemas\TestimoniForm;
+use App\Filament\Resources\Testimonis\Pages\ViewTestimoni;
 use App\Filament\Resources\Testimonis\Tables\TestimonisTable;
 use App\Models\Testimoni;
 use BackedEnum;
@@ -22,7 +20,8 @@ class TestimoniResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return TestimoniForm::configure($schema);
+        // Nonaktifkan form karena tidak boleh edit
+        return $schema->schema([]);
     }
 
     public static function table(Table $table): Table
@@ -32,17 +31,20 @@ class TestimoniResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => ListTestimonis::route('/'),
-            // 'create' => CreateTestimoni::route('/create'),
-            // 'edit' => EditTestimoni::route('/{record}/edit'),
+            'view' => ViewTestimoni::route('/{record}'),
+            // Hapus create dan edit routes
         ];
+    }
+
+    public static function canCreate(): bool
+    {
+        return false; // Nonaktifkan pembuatan testimoni
     }
 }

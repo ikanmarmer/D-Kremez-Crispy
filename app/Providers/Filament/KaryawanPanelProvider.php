@@ -27,7 +27,6 @@ class KaryawanPanelProvider extends PanelProvider
         return $panel
             ->id('karyawan')
             ->path('karyawan')
-            ->login(LoginCustom::class)
             ->colors([
                 'primary' => Color::Amber,
             ])

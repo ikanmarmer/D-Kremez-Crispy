@@ -36,5 +36,12 @@ class DatabaseSeeder extends Seeder
             'role' => Role::Karyawan->value,
             'password' => 'testK',
         ]);
+
+        User::factory()->create([
+            'name' => 'User2',
+            'email' => 'User2@gmail.com',
+            'role' => Role::User->value,
+            'password' => 'User2',
+        ]);
     }
 }

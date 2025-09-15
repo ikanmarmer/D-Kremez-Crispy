@@ -10,9 +10,12 @@ return new class extends Migration
     {
         Schema::create('testimoni', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_users')->constrained('users')->onDelete('cascade');
-            $table->text('konten');
-            $table->tinyInteger('penilaian');
+            $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->string('avatar')->nullable();
+            $table->decimal('rating', 2, 1)->unsigned();
+            $table->text('content');
+            $table->string('product_photo')->nullable();
             $table->string('status')->default('Menunggu');
             $table->timestamps();
         });
