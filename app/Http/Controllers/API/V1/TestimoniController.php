@@ -45,6 +45,16 @@ class TestimoniController extends Controller
         ], 200);
     }
 
+    public function hasSubmittedTestimonial(Request $request)
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'hasSubmitted' => $user->testimonial()->exists()
+        ]);
+    }
+
+
     public function submitTestimonial(Request $request)
     {
         $user = $request->user();

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Status;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -22,6 +23,13 @@ class Testimoni extends Model
         'product_photo',
         'status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => Status::class,
+        ];
+    }
 
     public function user()
     {

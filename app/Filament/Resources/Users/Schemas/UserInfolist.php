@@ -8,7 +8,7 @@ use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Actions;
-use Filament\Infolists\Components\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 
@@ -110,7 +110,7 @@ class UserInfolist
                                 ]),
                             ]),
                     ]),
-                    
+
             ]);
     }
 }

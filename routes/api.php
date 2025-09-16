@@ -29,6 +29,9 @@ Route::prefix('V1')->group(function () {
         ->controller(TestimoniController::class)
         ->group(function () {
             Route::get('/', 'getApprovedTestimonials');
-            Route::middleware('auth:sanctum')->post('/', 'submitTestimonial');
+            Route::middleware('auth:sanctum')->group(function () {
+                Route::post('/', 'submitTestimonial');
+                Route::get('/check', 'hasSubmittedTestimonial');
+            });
         });
 });
