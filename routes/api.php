@@ -23,6 +23,7 @@ Route::prefix('V1')->group(function () {
                 Route::post('/update-profile', 'updateProfile');
                 Route::post('/upload-avatar', 'uploadAvatar');
                 Route::delete('/avatar', 'deleteAvatar');
+                Route::post('/change-password', 'changePassword');  
             });
         });
     Route::prefix('testimonials')
