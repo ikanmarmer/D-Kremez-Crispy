@@ -3,19 +3,23 @@
 namespace App\Filament\Resources\Testimonis\Tables;
 
 use App\Enums\Status;
-use App\Models\Testimoni;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\Action;
-use Filament\Notifications\Notification;
+use Filament\Actions\ViewAction;
+use App\Models\Testimoni;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use App\Filament\Resources\Testimonis\TestimoniResource;
+use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Collection;
+
 
 class TestimonisTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->heading('Daftar Testimoni')
             ->columns([
                 TextColumn::make('user.name')
                     ->label('Nama Pengguna')
@@ -23,78 +27,76 @@ class TestimonisTable
                     ->sortable(),
                 TextColumn::make('content')
                     ->label('Isi Testimoni')
-                    ->words(20)
+                    ->limit(100)
                     ->wrap(),
                 TextColumn::make('rating')
                     ->label('Rating')
+                    ->numeric()
+                    ->sortable()
                     ->badge()
-                    ->color(fn($state) => match (true) {
-                        $state >= 4 => 'success',
-                        $state >= 3 => 'warning',
-                        default => 'danger',
+                    ->color('primary')
+                    ->icon(fn(int $state): string => match (true) {
+                        $state >= 1 && $state <= 5 => 'heroicon-s-star',
+                        default => 'heroicon-o-star'
                     }),
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        Status::Menunggu->value => 'warning',
-                        Status::Disetujui->value => 'success',
-                        Status::Ditolak->value => 'danger',
-                    }),
-                TextColumn::make('created_at')
-                    ->label('Dibuat pada')
-                    ->dateTime()
                     ->sortable(),
             ])
             ->filters([
-                // Filter berdasarkan status
+                //
             ])
             ->actions([
-                Action::make('view')
-                    ->label('Lihat')
-                    ->icon('heroicon-o-eye')
-                    ->url(fn(Testimoni $record): string => TestimoniResource::getUrl('view', ['record' => $record])),
+                ViewAction::make()
+                    ->label('Lihat'),
                 Action::make('approve')
                     ->label('Setujui')
-                    ->visible(fn(Testimoni $record): bool => $record->status === Status::Menunggu->value)
-                    ->color('success')
                     ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Setujui Testimoni')
+                    ->modalDescription('Apakah Anda yakin ingin menyetujui testimoni ini?')
                     ->action(function (Testimoni $record) {
-                        $record->update(['status' => Status::Disetujui->value]);
+                        $record->update([
+                            'status' => Status::Disetujui,
+                            'is_notified' => false,
+                        ]);
+
                         Notification::make()
-                            ->title('Testimoni disetujui.')
+                            ->title('Testimoni disetujui')
                             ->success()
                             ->send();
                     }),
                 Action::make('reject')
                     ->label('Tolak')
-                    ->visible(fn(Testimoni $record): bool => $record->status === Status::Menunggu->value)
-                    ->color('danger')
                     ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Tolak Testimoni')
+                    ->modalDescription('Apakah Anda yakin ingin menolak testimoni ini?')
                     ->action(function (Testimoni $record) {
-                        $record->update(['status' => Status::Ditolak->value]);
+                        $record->update([
+                            'status' => Status::Ditolak,
+                            'is_notified' => false,
+                        ]);
+
                         Notification::make()
-                            ->title('Testimoni ditolak.')
+                            ->title('Testimoni ditolak')
                             ->danger()
                             ->send();
                     }),
-                Action::make('delete_rejected')
-                    ->label('Hapus Testimoni Ditolak')
-                    ->visible(fn(Testimoni $record): bool => $record->status === Status::Ditolak->value)
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Testimoni $record) {
-                        $record->delete();
-                        Notification::make()
-                            ->title('Testimoni ditolak dihapus.')
-                            ->success()
-                            ->send();
-                    }),
+                
+                DeleteAction::make()
+                    ->visible(fn(Testimoni $record): bool => $record->status === Status::Ditolak),
             ])
             ->bulkActions([
-                // Tidak perlu bulk actions untuk menjaga keamanan data
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->visible(fn(Collection $records): bool => $records->every(fn(Testimoni $record): bool => $record->status === Status::Ditolak)),
+                ]),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('created_at', 'desc')
+            ->selectCurrentPageOnly();
     }
 }

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 
@@ -78,6 +79,11 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt($credentials)) {
+            Log::warning('Login gagal', [
+                'email' => $request->input('email'),
+                'ip' => $request->ip(),
+                'time' => now(),
+            ]);
             return response()->json(['message' => 'Email atau kata sandi salah'], 401);
         }
 
@@ -151,23 +157,23 @@ class AuthController extends Controller
     }
 
     public function changePassword(Request $request)
-{
-    $request->validate([
-        'current_password' => 'required',
-        'new_password' => 'required|string|min:8|confirmed',
-    ]);
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
 
-    $user = $request->user();
+        $user = $request->user();
 
-    if (!Hash::check($request->current_password, $user->password)) {
-        return response()->json(['message' => 'Password lama salah'], 400);
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Password lama salah'], 400);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        return response()->json(['message' => 'Password berhasil diubah']);
     }
-
-    $user->update([
-        'password' => Hash::make($request->new_password),
-    ]);
-
-    return response()->json(['message' => 'Password berhasil diubah']);
-}
 
 }

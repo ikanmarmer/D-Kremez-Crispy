@@ -4,33 +4,37 @@ namespace App\Filament\Resources\Testimonis;
 
 use App\Filament\Resources\Testimonis\Pages\ListTestimonis;
 use App\Filament\Resources\Testimonis\Pages\ViewTestimoni;
+use App\Filament\Resources\Testimonis\Schemas\TestimoniForm;
+use App\Filament\Resources\Testimonis\Schemas\TestimoniInfolist;
 use App\Filament\Resources\Testimonis\Tables\TestimonisTable;
 use App\Models\Testimoni;
 use BackedEnum;
 use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class TestimoniResource extends Resource
 {
     protected static ?string $model = Testimoni::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleBottomCenterText;
-
-    protected static ?string $label = 'Testimoni';
-
-    protected static ?string $navigationLabel = 'Testimoni';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static string|UnitEnum|null $navigationGroup = 'Kelola';
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $modelLabel = 'Testimoni';
+
+    protected static ?string $pluralModelLabel = 'Testimoni';
+
 
     public static function form(Schema $schema): Schema
     {
-        // Nonaktifkan form karena tidak boleh edit
-        return $schema->schema([]);
+        return TestimoniForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return TestimoniInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -40,20 +44,17 @@ class TestimoniResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            //
+        ];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => ListTestimonis::route('/'),
-            'view' => ViewTestimoni::route('/{record}'),
-            // Hapus create dan edit routes
-        ];
-    }
 
-    public static function canCreate(): bool
-    {
-        return false; // Nonaktifkan pembuatan testimoni
+            'view' => ViewTestimoni::route('/{record}'),
+        ];
     }
 }

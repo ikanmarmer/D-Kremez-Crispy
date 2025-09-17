@@ -44,3 +44,60 @@ button:hover, a:hover {
   box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.5);
 }
 
+/* Mengatur gaya umum untuk form dan input */
+.fi-form-field {
+  margin-bottom: 1.5rem; /* Menambah jarak antar field */
+}
+
+/* Gaya untuk setiap Fieldset (kotak grup) */
+.fi-fieldset {
+  background-color: #f9fafb; /* Latar belakang abu-abu sangat muda */
+  border: 1px solid #e5e7eb; /* Border abu-abu tipis */
+  border-radius: 0.5rem; /* Sudut membulat */
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); /* Bayangan halus */
+}
+
+/* Gaya untuk input text dan select */
+.fi-input {
+  border-radius: 0.375rem; /* Sudut sedikit membulat pada input */
+  border: 1px solid #d1d5db; /* Border abu-abu */
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Efek fokus pada input */
+.fi-input:focus {
+  border-color: #6366f1; /* Border biru saat fokus */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* Bayangan biru halus */
+}
+
+/* Custom scrollbar style */
+.custom-scroll {
+    overflow: auto;
+    max-height: 600px;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f7fafc; /* thumb color, track color */
+}
+
+.custom-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: #f7fafc;
+    border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+
+img.avatar-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

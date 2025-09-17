@@ -14,7 +14,7 @@ Route::prefix('V1')->group(function () {
         ->controller(AuthController::class)
         ->group(function () {
             Route::post('/register', 'register');
-            Route::post('/login', 'login');
+            Route::post('/login', 'login')->middleware('throttle:5,1');
             Route::get('/oauth/google', 'oAuthUrl');
             Route::get('/oauth/google/callback', 'oAuthCallback');
             Route::middleware('auth:sanctum')->group(function () {
@@ -23,7 +23,7 @@ Route::prefix('V1')->group(function () {
                 Route::post('/update-profile', 'updateProfile');
                 Route::post('/upload-avatar', 'uploadAvatar');
                 Route::delete('/avatar', 'deleteAvatar');
-                Route::post('/change-password', 'changePassword');  
+                Route::post('/change-password', 'changePassword');
             });
         });
     Route::prefix('testimonials')
@@ -33,6 +33,9 @@ Route::prefix('V1')->group(function () {
             Route::middleware('auth:sanctum')->group(function () {
                 Route::post('/', 'submitTestimonial');
                 Route::get('/check', 'hasSubmittedTestimonial');
+                Route::post('/mark-notified', 'markAsNotified');
+                Route::get('/my-testimonial', 'getUserTestimonial');
+
             });
         });
 });

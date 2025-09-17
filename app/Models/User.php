@@ -77,7 +77,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function testimonial()
     {
-        return $this->hasOne(Testimoni::class);
+        return $this->hasMany(Testimoni::class);
     }
 
     public function rekapHarians()

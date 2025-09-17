@@ -10,6 +10,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -18,7 +19,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use App\Filament\Karyawan\Pages\Auth\LoginCustom;
+use App\Filament\Pages\Auth\Login;
+
 
 class KaryawanPanelProvider extends PanelProvider
 {
@@ -27,9 +29,18 @@ class KaryawanPanelProvider extends PanelProvider
         return $panel
             ->id('karyawan')
             ->path('karyawan')
+            ->login(Login::class)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::hex('#8B4513'), // Coklat tua (seperti coklat chocolate)
+                'secondary' => Color::hex('#D2B48C'), // Coklat tan (warna krem kecoklatan)
+                'gray' => Color::Gray,
+                'danger' => Color::Red,
+                'success' => Color::Green,
+                'warning' => Color::Amber,
+                'info' => Color::Blue,
             ])
+            ->font('Poppins')
+            ->maxContentWidth(Width::Full)
             ->discoverResources(in: app_path('Filament/Karyawan/Resources'), for: 'App\Filament\Karyawan\Resources')
             ->discoverPages(in: app_path('Filament/Karyawan/Pages'), for: 'App\Filament\Karyawan\Pages')
             ->pages([
@@ -53,6 +64,6 @@ class KaryawanPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])->viteTheme('resources/css/filament/admin/theme.css');
     }
 }

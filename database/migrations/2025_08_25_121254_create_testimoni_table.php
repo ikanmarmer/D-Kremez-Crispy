@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('content');
             $table->string('product_photo')->nullable();
             $table->string('status')->default('Menunggu');
+            $table->boolean('is_notified')->default(false);
             $table->timestamps();
         });
     }

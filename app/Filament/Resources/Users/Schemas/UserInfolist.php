@@ -2,115 +2,67 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
-use App\Enums\Status;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\Fieldset;
-use Filament\Infolists\Components\TextEntry;
+use App\Enums\Role;
+use App\Filament\Resources\Testimonis\Schemas\TestimoniInfolist;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\Actions;
-use Filament\Actions\Action;
-use Filament\Notifications\Notification;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Schema;
 
 class UserInfolist
 {
     public static function configure(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                Grid::make(2)
-                    ->schema([
-                        Fieldset::make('Informasi Pengguna')
-                            ->schema([
-                                TextEntry::make('name'),
-                                TextEntry::make('email')
-                                    ->label('Alamat email'),
-                                TextEntry::make('role')
-                                    ->label('Peran'),
-                                ImageEntry::make('avatar')
-                                    ->label('Avatar')
-                                    ->disk('public')
-                                    ->placeholder('Belum ada avatar')
-                                    ->circular()
-                                    ->height(100),
-                                TextEntry::make('created_at')
-                                    ->label('Dibuat pada')
-                                    ->dateTime(),
-                                TextEntry::make('updated_at')
-                                    ->label('Diperbarui pada')
-                                    ->dateTime(),
-                            ]),
-                        Fieldset::make('Testimoni')
-                            ->schema([
-                                TextEntry::make('testimonial.content')
-                                    ->label('Isi Testimoni')
-                                    ->placeholder('Belum ada testimoni')
-                                    ->html()
-                                    ->columnSpanFull(),
-                                TextEntry::make('testimonial.rating')
-                                    ->label('Rating')
-                                    ->placeholder('Belum ada rating')
-                                    ->badge()
-                                    ->color(fn($state) => $state ? 'primary' : 'gray'),
-                                TextEntry::make('testimonial.status')
-                                    ->label('Status')
-                                    ->placeholder('Belum ada testimoni')
-                                    ->badge()
-                                    ->color(fn(string $state): string => match ($state) {
-                                        Status::Menunggu->value => 'warning',
-                                        Status::Disetujui->value => 'success',
-                                        Status::Ditolak->value => 'danger',
-                                        default => 'gray',
-                                    }),
-                                ImageEntry::make('testimonial.product_photo')
-                                    ->label('Foto Produk')
-                                    ->disk('public')
-                                    ->placeholder('Belum ada foto produk')
-                                    ->visible(fn($record) => $record->testimonial && $record->testimonial->product_photo),
-                            ])
-                            ->headerActions([
-                                Actions::make([
-                                    Action::make('approve_testimonial')
-                                        ->label('Setujui Testimoni')
-                                        ->color('success')
-                                        ->icon('heroicon-o-check-circle')
-                                        ->visible(fn($record) => $record->testimonial && $record->testimonial->status === Status::Menunggu->value)
-                                        ->action(function ($record) {
-                                            $record->testimonial->update(['status' => Status::Disetujui->value]);
-                                            Notification::make()
-                                                ->title('Testimoni disetujui!')
-                                                ->success()
-                                                ->send();
-                                        }),
-                                    Action::make('reject_testimonial')
-                                        ->label('Tolak Testimoni')
-                                        ->color('danger')
-                                        ->icon('heroicon-o-x-circle')
-                                        ->visible(fn($record) => $record->testimonial && $record->testimonial->status === Status::Menunggu->value)
-                                        ->action(function ($record) {
-                                            $record->testimonial->update(['status' => Status::Ditolak->value]);
-                                            Notification::make()
-                                                ->title('Testimoni ditolak!')
-                                                ->danger()
-                                                ->send();
-                                        }),
-                                    Action::make('delete_rejected_testimonial')
-                                        ->label('Hapus Testimoni Ditolak')
-                                        ->color('danger')
-                                        ->icon('heroicon-o-trash')
-                                        ->visible(fn($record) => $record->testimonial && $record->testimonial->status === Status::Ditolak->value)
-                                        ->requiresConfirmation()
-                                        ->action(function ($record) {
-                                            $record->testimonial->delete();
-                                            Notification::make()
-                                                ->title('Testimoni ditolak dihapus!')
-                                                ->success()
-                                                ->send();
-                                        }),
-                                ]),
-                            ]),
-                    ]),
+        return $schema->components([
+            Section::make('Profil Pengguna')
+                ->columns(2)
+                ->components([
+                    ImageEntry::make('avatar')
+                        ->label('Avatar')
+                        ->disk('public')
+                        ->placeholder('Belum ada avatar')
+                        ->extraImgAttributes([
+                            'class' => 'w-full h-full rounded-lg object-cover shadow-md',
+                        ])
+                        ->columnSpan(1),
+                    Group::make([
+                        TextEntry::make('name')
+                            ->label('Nama Lengkap')
+                            ->extraAttributes(['class' => 'text-lg font-semibold']),
+                        TextEntry::make('email')
+                            ->label('Alamat Email')
+                            ->copyable()
+                            ->extraAttributes(['class' => 'text-sm font-semibold']),
+                        TextEntry::make('role')
+                            ->label('Peran')
+                            ->badge()
+                            ->formatStateUsing(fn(Role $state) => match ($state) {
+                                Role::Admin => 'Admin',
+                                Role::User => 'Pengguna',
+                                Role::Karyawan => 'Karyawan',
+                            })
+                            ->color(fn(Role $state): string => match ($state) {
+                                Role::Admin => 'secondary',
+                                Role::User => 'success',
+                                Role::Karyawan => 'primary',
+                            }),
+                    ])->columnSpan(1),
+                ]),
 
-            ]);
+            Section::make('Waktu')
+                ->columns(2)
+                ->components([
+                    TextEntry::make('created_at')
+                        ->label('Dibuat pada')
+                        ->dateTime()
+                        ->extraAttributes(['class' => 'text-sm text-gray-500']),
+                    TextEntry::make('updated_at')
+                        ->label('Diperbarui pada')
+                        ->dateTime()
+                        ->extraAttributes(['class' => 'text-sm text-gray-500']),
+                ]),
+        ]);
     }
 }
