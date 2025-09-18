@@ -107,20 +107,19 @@ class TestimoniController extends Controller
         $user = $request->user();
         $testimonial = $user->testimonial()->first();
 
-        if ($testimonial) {
+        if ($testimonial && !$testimonial->is_notified) {
             $testimonial->is_notified = true;
             $testimonial->save();
+
             return response()->json([
                 'message' => 'Notification marked as read.',
             ], 200);
         }
 
         return response()->json([
-            'message' => 'No new notification found.',
-        ], 404);
+            'message' => 'No new notification to mark as read.',
+        ], 200);
     }
-
-
     public function submitTestimonial(Request $request)
     {
         $user = $request->user();
@@ -142,11 +141,13 @@ class TestimoniController extends Controller
                 $testimoni->product_photo = $request->file('product_photo')->store('testimonials/product-photos', 'public');
             }
 
+            $statusChanged = $testimoni->status !== Status::Menunggu;
+
             $testimoni->update([
                 'rating' => $validated['rating'],
                 'content' => $validated['content'],
-                'status' => Status::Menunggu, // Revert status to 'Menunggu' on edit
-                'is_notified' => false, // Reset notification status
+                'status' => Status::Menunggu,
+                'is_notified' => $statusChanged ? false : $testimoni->is_notified,
             ]);
 
             return response()->json([
