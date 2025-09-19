@@ -34,10 +34,16 @@ class TestimonisTable
                     ->numeric()
                     ->sortable()
                     ->badge()
-                    ->color('primary')
+                    ->color(fn(int $state): string => match (true) {
+                        $state <= 2 => 'danger',
+                        $state <= 3 => 'warning',
+                        $state <= 4 => 'info',
+                        $state == 5 => 'success',
+                        default => 'gray',
+                    })
                     ->icon(fn(int $state): string => match (true) {
                         $state >= 1 && $state <= 5 => 'heroicon-s-star',
-                        default => 'heroicon-o-star'
+                        default => 'heroicon-o-star',
                     }),
                 TextColumn::make('status')
                     ->label('Status')

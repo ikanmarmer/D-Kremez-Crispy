@@ -115,10 +115,19 @@ class TestimoniInfolist
 
                                 TextEntry::make('rating')
                                     ->label('Rating')
+                                    ->numeric()
                                     ->badge()
-                                    ->color('info')
-                                    ->icon('heroicon-m-star')
-                                    ->formatStateUsing(fn($state) => "{$state}/5"),
+                                    ->color(fn(int $state): string => match (true) {
+                                        $state <= 2 => 'danger',
+                                        $state <= 3 => 'warning',
+                                        $state <= 4 => 'info',
+                                        $state == 5 => 'success',
+                                        default => 'gray',
+                                    })
+                                    ->icon(fn(int $state): string => match (true) {
+                                        $state >= 1 && $state <= 5 => 'heroicon-s-star',
+                                        default => 'heroicon-o-star',
+                                    }),
 
                                 IconEntry::make('is_notified')
                                     ->label('Sudah Dilihat Pengguna?')
@@ -170,34 +179,34 @@ class TestimoniInfolist
                             ->columnSpanFull(),
                     ]),
 
-                // SECTION: Aksi (Approve / Reject)
-                Section::make('Aksi')
-                    ->icon('heroicon-o-hand-thumb-up')
+                Section::make('Aksi Moderasi')
+                    ->icon('heroicon-o-adjustments-horizontal')
+                    ->description('Pilih tindakan untuk testimoni ini.')
                     ->schema([
-                        Action::make('approve')
-                            ->label('Setujui')
-                            ->color('success')
-                            ->icon('heroicon-m-check-circle')
-                            ->requiresConfirmation()
-                            ->action(fn($record) => $record->update([
-                                'status' => Status::Disetujui,
-                            ]))
-                            // ✅ Hanya tampilkan jika statusnya 'Menunggu'
-                            ->visible(fn($record) => $record->status === Status::Menunggu),
+                        Flex::make([
+                            Action::make('approve')
+                                ->label('Setujui')
+                                ->color('success')
+                                ->icon('heroicon-m-check-circle')
+                                ->requiresConfirmation()
+                                ->action(fn($record) => $record->update([
+                                    'status' => Status::Disetujui,
+                                ])),
 
-                        Action::make('reject')
-                            ->label('Tolak')
-                            ->color('danger')
-                            ->icon('heroicon-m-x-circle')
-                            ->requiresConfirmation()
-                            ->action(fn($record) => $record->update([
-                                'status' => Status::Ditolak,
-                            ]))
-                            // ✅ Hanya tampilkan jika statusnya 'Menunggu'
-                            ->visible(fn($record) => $record->status === Status::Menunggu),
+
+                            Action::make('reject')
+                                ->label('Tolak')
+                                ->color('danger')
+                                ->icon('heroicon-m-x-circle')
+                                ->requiresConfirmation()
+                                ->action(fn($record) => $record->update([
+                                    'status' => Status::Ditolak,
+                                ])),
+
+                        ])->gap(3), // ✅ jarak antar tombol
                     ])
-                    // ✅ Tambahkan kondisi visibilitas untuk Section
-                    ->visible(fn($record) => $record->status === Status::Menunggu),
-                ]);
+                    ->columns(2)
+                    ->hidden(fn($record) => in_array($record->status, [Status::Disetujui, Status::Ditolak])),
+            ]);
     }
 }
