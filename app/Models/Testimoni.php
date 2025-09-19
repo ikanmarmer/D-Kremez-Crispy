@@ -14,14 +14,18 @@ class Testimoni extends Model
     protected $table = 'testimoni';
 
     protected $fillable = [
-    'id_users',
-    'konten',
-    'penilaian',
-    'status',
-];
+        'user_id',
+        'name',
+        'avatar',
+        'rating',
+        'content',
+        'product_photo',
+        'status',
+    ];
 
-public function user()
-{
-    return $this->belongsTo(User::class, 'id_users');
-}
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

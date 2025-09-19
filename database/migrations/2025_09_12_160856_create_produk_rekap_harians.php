@@ -4,14 +4,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('produk_rekap_harian', function (Blueprint $table) {
+        Schema::create('produk_rekap_harians', function (Blueprint $table) {
             $table->id();
             $table->foreignId('rekap_harian_id')->constrained('rekap_harians')->onDelete('cascade');
             $table->foreignId('produk_id')->constrained('produk')->onDelete('cascade');

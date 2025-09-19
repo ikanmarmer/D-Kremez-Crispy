@@ -50,7 +50,6 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         return match ($panel->getId()) {
             'admin' => $this->role === Role::Admin,
-            'owner' => $this->role === Role::Owner,
             'karyawan' => $this->role === Role::Karyawan,
             default => false,
         };
@@ -59,19 +58,21 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     /**
      * Relationships
      */
-    public function testimoni()
+
+    public function testimonial()
     {
         return $this->hasMany(Testimoni::class, 'id_users');
     }
 
     public function laporan()
     {
-        return $this->hasMany(LaporanPenjualan::class, 'id_pengguna');
+        return $this->hasMany(LaporanPenjualan::class, 'id_users');
     }
 
     public function verifikasiAdmin()
     {
         return $this->hasMany(Verifikasi::class, 'id_admin');
+        return $this->hasMany(Testimoni::class);
     }
 
     public function rekapHarians()

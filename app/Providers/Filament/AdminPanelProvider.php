@@ -10,6 +10,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -17,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Pages\Auth\Login;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -24,10 +26,10 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->globalSearch(false)
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->globalSearch(false)
+            ->login(Login::class)
             ->brandName('Dasbor Admin')
             ->colors([
                 'primary' => Color::hex('#8B4513'), // Coklat tua (seperti coklat chocolate)
@@ -39,6 +41,7 @@ class AdminPanelProvider extends PanelProvider
                 'info' => Color::Blue,
             ])
             ->font('Poppins')
+            ->maxContentWidth(Width::Full)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

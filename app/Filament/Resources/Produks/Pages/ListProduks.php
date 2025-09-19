@@ -16,9 +16,4 @@ class ListProduks extends ListRecords
             CreateAction::make(),
         ];
     }
-
-    public function getHeading(): string
-    {
-        return '';
-    }
 }

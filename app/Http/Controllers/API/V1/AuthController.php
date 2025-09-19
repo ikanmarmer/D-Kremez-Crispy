@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API\V1;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,29 +12,26 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerificationCodeMail;
 use App\Enums\Role;
+use Illuminate\Validation\Rule;
+use App\Http\Controllers\Controller;
+
 
 class AuthController extends Controller
 {
     /**
      * Helper format user.
      */
-    private function formatUserResponse(User $user)
+    private function formatUserResponse(User $user): array
     {
-        $relativeUrl = $user->avatar ? Storage::url($user->avatar) : null;
-        $avatarUrl = $relativeUrl ? URL::to($relativeUrl) : null;
+        $avatarUrl = $user->avatar ? URL::to(Storage::url($user->avatar)) : null;
 
-        return [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
-            'avatar' => $user->avatar,
-            'avatar_url' => $avatarUrl,
-            'email_verified_at' => $user->email_verified_at,
-            'profile_completed' => (bool)$user->profile_completed,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-        ];
+        return array_merge(
+            $user->only(['id', 'name', 'email', 'role', 'created_at', 'updated_at']),
+            [
+                'avatar' => $user->avatar,
+                'avatar_url' => $avatarUrl,
+            ]
+        );
     }
 
     /**
@@ -266,5 +262,85 @@ class AuthController extends Controller
             'success' => true,
             'user' => $this->formatUserResponse($request->user()),
         ]);
+    }
+
+    private function uploadAvatar(Request $request): ?string
+    {
+        if (!$request->hasFile('avatar')) {
+            return null;
+        }
+
+        return $request->file('avatar')->store('avatars', 'public');
+    }
+
+    private function deleteAvatarFile(?string $avatarPath): void
+    {
+        if ($avatarPath) {
+            Storage::disk('public')->delete($avatarPath);
+        }
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user)],
+            'password' => 'nullable|string|min:8|confirmed',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+        ]);
+
+        $data = $request->only('name', 'email');
+
+        if ($request->hasFile('avatar')) {
+            $this->deleteAvatarFile($user->avatar);
+            $data['avatar'] = $this->uploadAvatar($request);
+        }
+
+        if (!empty($validated['password'])) {
+            $data['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui',
+            'user' => $this->formatUserResponse($user),
+        ]);
+    }
+
+    public function deleteAvatar(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->avatar) {
+            $this->deleteAvatarFile($user->avatar);
+            $user->update(['avatar' => null]);
+
+            return response()->json(['message' => 'Avatar berhasil dihapus']);
+        }
+
+        return response()->json(['message' => 'Tidak ada avatar untuk dihapus'], 404);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Password lama salah'], 400);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        return response()->json(['message' => 'Password berhasil diubah']);
     }
 }

@@ -6,7 +6,6 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Enums\Role;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -39,10 +38,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory()->create([
-            'name' => 'testO',
-            'email' => 'testO@gmail.com',
-            'role' => Role::Owner->value,
-            'password' => 'testO',
+            'name' => 'User2',
+            'email' => 'User2@gmail.com',
+            'role' => Role::User->value,
+            'password' => 'User2',
         ]);
     }
 }

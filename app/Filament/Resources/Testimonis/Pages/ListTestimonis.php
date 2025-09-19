@@ -10,8 +10,6 @@ class ListTestimonis extends ListRecords
 {
     protected static string $resource = TestimoniResource::class;
 
-    protected static ?string $title = '';
-
     protected function getHeaderActions(): array
     {
         return [

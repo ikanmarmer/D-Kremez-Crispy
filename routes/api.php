@@ -1,8 +1,9 @@
 <?php
 
+use App\Http\Controllers\API\V1\AuthController;
+use App\Http\Controllers\API\V1\TestimoniController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\V1\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,23 +12,37 @@ use App\Http\Controllers\API\V1\AuthController;
 */
 
 Route::prefix('v1')->group(function () {
-    Route::prefix('auth')->group(function () {
-        Route::middleware('auth:sanctum')->group(function () {
-            Route::get('/user', function (Request $request) {
-                return $request->user();
+    Route::prefix('auth')
+        ->controller(AuthController::class)
+        ->group(function () {
+            Route::middleware('auth:sanctum')->group(function () {
+                Route::get('/setup-profile', 'setupProfile');
+                Route::post('/logout', 'logout');
+                Route::get('/profile', 'profile');
+                Route::post('/upload-avatar', 'uploadAvatar');
+                Route::post('/update-profile', 'updateProfile');
+                Route::delete('/avatar', 'deleteAvatar');
+                Route::post('/change-password', 'changePassword');
             });
-            Route::post('/logout', [AuthController::class, 'logout']);
-            Route::get('/profile', [AuthController::class, 'profile']);
-            Route::post('/setup-profile', [AuthController::class, 'setupProfile']);
-            Route::post('/update-profile', [AuthController::class, 'updateProfile']);
-            Route::post('/upload-avatar', [AuthController::class, 'uploadAvatar']);
-            Route::post('/delete-avatar', [AuthController::class, 'deleteAvatar']);
+
+            // Public routes
+            Route::post('/register', [AuthController::class, 'register']);
+            Route::post('/login', [AuthController::class, 'login']);
+            Route::post('/verify-code', [AuthController::class, 'verifyCode']);
+            Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
+
+        });
+    Route::prefix('testimonials')
+        ->controller(TestimoniController::class)
+        ->group(function () {
+            Route::get('/', 'getApprovedTestimonials');
+            Route::middleware('auth:sanctum')->group(function () {
+                Route::post('/', 'submitTestimonial');
+                Route::get('/check', 'hasSubmittedTestimonial');
+                Route::post('/mark-notified', 'markAsNotified');
+                Route::get('/my-testimonial', 'getUserTestimonial');
+
+            });
         });
 
-        // Public routes
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/login', [AuthController::class, 'login']);
-        Route::post('/verify-code', [AuthController::class, 'verifyCode']);
-        Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
-    });
 });

@@ -6,12 +6,10 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+use Filament\Support\Enums\Width;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -19,27 +17,34 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class OwnerPanelProvider extends PanelProvider
+class LoginPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->id('owner')
-            ->path('owner')
-            ->login()
+            ->id('login')
+            ->login(\App\Filament\Pages\Auth\Login::class)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::hex('#8B4513'), // Coklat tua (seperti coklat chocolate)
+                'secondary' => Color::hex('#D2B48C'), // Coklat tan (warna krem kecoklatan)
+                'gray' => Color::Gray,
+                'danger' => Color::Red,
+                'success' => Color::Green,
+                'warning' => Color::Amber,
+                'info' => Color::Blue,
             ])
-            ->discoverResources(in: app_path('Filament/Owner/Resources'), for: 'App\Filament\Owner\Resources')
-            ->discoverPages(in: app_path('Filament/Owner/Pages'), for: 'App\Filament\Owner\Pages')
-            ->pages([
-                Dashboard::class,
-            ])
-            ->discoverWidgets(in: app_path('Filament/Owner/Widgets'), for: 'App\Filament\Owner\Widgets')
-            ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
-            ])
+            ->font('Poppins')
+            ->maxContentWidth(Width::Full)
+            // ->discoverResources(in: app_path('Filament/Login/Resources'), for: 'App\Filament\Login\Resources')
+            // ->discoverPages(in: app_path('Filament/Login/Pages'), for: 'App\Filament\Login\Pages')
+            // ->pages([
+            //     Dashboard::class,
+            // ])
+            // ->discoverWidgets(in: app_path('Filament/Login/Widgets'), for: 'App\Filament\Login\Widgets')
+            // ->widgets([
+            //     AccountWidget::class,
+            //     FilamentInfoWidget::class,
+            // ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -53,6 +58,6 @@ class OwnerPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])->viteTheme('resources/css/filament/admin/theme.css');
     }
 }
