@@ -55,9 +55,4 @@ class ProdukResource extends Resource
             'edit' => EditProduk::route('/{record}/edit'),
         ];
     }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 1;
-    }
 }

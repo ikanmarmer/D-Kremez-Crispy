@@ -11,6 +11,11 @@ class Produk extends Model
 
     protected $table = 'produk';
 
+    public $timestamps = true;
+    
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = 'diperbarui_pada';
+
     protected $fillable = [
         'nama',
         'kode_produk',

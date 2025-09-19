@@ -17,19 +17,21 @@ class ProduksTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('nama')
                     ->searchable(),
                 TextColumn::make('harga')
                     ->numeric()
-                    ->sortable()
-                    ->money('idr', true),
+                    ->sortable(),
                 TextColumn::make('stok')
                     ->numeric()
                     ->sortable(),
                 ImageColumn::make('image'),
+                TextColumn::make('dibuat_pada')
+                    ->dateTime()
+                    ->sortable(),
+                TextColumn::make('diperbarui_pada')
+                    ->dateTime()
+                    ->sortable(),
                 IconColumn::make('aktif')
                     ->boolean(),
             ])

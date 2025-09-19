@@ -4,7 +4,6 @@ namespace App\Filament\Karyawan\Resources\LaporanPenjualans\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 
 class LaporanPenjualanInfolist
 {
@@ -12,8 +11,7 @@ class LaporanPenjualanInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('user.name')
-                    ->label('nama karyawan')
+                TextEntry::make('users.name')
                     ->numeric(),
                 TextEntry::make('tanggal_laporan')
                     ->date(),
@@ -21,16 +19,21 @@ class LaporanPenjualanInfolist
                 TextEntry::make('omzet')
                     ->numeric(),
                 TextEntry::make('status')
-                    ->numeric()
-                    ->label('status laporan'),
+                    ->badge(),
                 TextEntry::make('dikirim_pada')
                     ->dateTime(),
                 TextEntry::make('disetujui_pada')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('catatan')
+                    ->placeholder('-')
+                    ->columnSpanFull(),
                 TextEntry::make('created_at')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->placeholder('-'),
                 TextEntry::make('updated_at')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->placeholder('-'),
             ]);
     }
 }

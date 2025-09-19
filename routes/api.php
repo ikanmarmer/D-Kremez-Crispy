@@ -1,30 +1,36 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\TestimoniController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('V1')->group(function () {
+
+Route::prefix('v1')->group(function () {
     Route::prefix('auth')
         ->controller(AuthController::class)
         ->group(function () {
-            Route::post('/register', 'register');
-            Route::post('/login', 'login')->middleware('throttle:5,1');
-            Route::get('/oauth/google', 'oAuthUrl');
-            Route::get('/oauth/google/callback', 'oAuthCallback');
             Route::middleware('auth:sanctum')->group(function () {
+                Route::get('/setup-profile', 'setupProfile');
                 Route::post('/logout', 'logout');
                 Route::get('/profile', 'profile');
-                Route::post('/update-profile', 'updateProfile');
                 Route::post('/upload-avatar', 'uploadAvatar');
+                Route::post('/update-profile', 'updateProfile');
                 Route::delete('/avatar', 'deleteAvatar');
                 Route::post('/change-password', 'changePassword');
             });
+
+            // Public routes
+            Route::post('/register', [AuthController::class, 'register']);
+            Route::post('/login', [AuthController::class, 'login']);
+            Route::post('/verify-code', [AuthController::class, 'verifyCode']);
+            Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
+
         });
     Route::prefix('testimonials')
         ->controller(TestimoniController::class)
@@ -38,4 +44,5 @@ Route::prefix('V1')->group(function () {
 
             });
         });
+
 });
