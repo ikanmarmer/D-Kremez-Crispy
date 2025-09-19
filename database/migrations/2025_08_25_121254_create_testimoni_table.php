@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->timestamp('dibuat_pada')->useCurrent();
             $table->string('avatar')->nullable();
             $table->decimal('rating', 2, 1)->unsigned();
             $table->text('content');

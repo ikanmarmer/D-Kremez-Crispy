@@ -42,6 +42,11 @@ class TestimonisTable
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        Status::Menunggu->value => 'warning',
+                        Status::Disetujui->value => 'success',
+                        Status::Ditolak->value => 'danger',
+                    })
                     ->sortable(),
             ])
             ->filters([
@@ -55,7 +60,7 @@ class TestimonisTable
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->modalHeading('Setujui Testimoni')
+                    ->modalHeading('Setujui Testimoni ?')
                     ->modalDescription('Apakah Anda yakin ingin menyetujui testimoni ini?')
                     ->action(function (Testimoni $record) {
                         $record->update([
@@ -86,7 +91,7 @@ class TestimonisTable
                             ->danger()
                             ->send();
                     }),
-                
+
                 DeleteAction::make()
                     ->visible(fn(Testimoni $record): bool => $record->status === Status::Ditolak),
             ])
