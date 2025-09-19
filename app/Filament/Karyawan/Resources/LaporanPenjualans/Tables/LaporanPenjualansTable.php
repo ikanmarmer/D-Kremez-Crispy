@@ -15,8 +15,7 @@ class LaporanPenjualansTable
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
-                    ->label('nama karyawan')
+                TextColumn::make('id_users')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('tanggal_laporan')
@@ -27,8 +26,8 @@ class LaporanPenjualansTable
                 TextColumn::make('omzet')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('status'),
-
+                TextColumn::make('status')
+                    ->badge(),
                 TextColumn::make('dikirim_pada')
                     ->dateTime()
                     ->sortable(),

@@ -27,34 +27,28 @@ class SocialiteController extends Controller
         $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
 
         try {
-            // Ambil data user dari provider
             $socialUser = Socialite::driver($provider)->user();
 
-            // Cek apakah user sudah ada
             $existingUser = User::where('email', $socialUser->getEmail())->first();
 
             if ($existingUser) {
-                // Kalau sudah ada → login langsung
                 Auth::login($existingUser);
                 $token = $existingUser->createToken('auth_token')->plainTextToken;
 
                 if ($existingUser->profile_completed) {
-                    // Profil lengkap → arahkan ke halaman utama
                     return redirect()->to("{$frontendUrl}?token={$token}");
                 }
 
-                // Profil belum lengkap → arahkan ke setup profile
                 return redirect()->to("{$frontendUrl}/setup-profile?token={$token}");
             }
 
-            // Kalau user belum ada → buat baru
             $user = User::create([
                 'email'             => $socialUser->getEmail(),
                 'name'              => $socialUser->getName() ?? null,
-                'password'          => null, // Password akan diatur saat setup profile
-                'email_verified_at' => now(), // Langsung verified via OAuth
+                'password'          => null,
+                'email_verified_at' => now(),
                 'role'              => Role::User,
-                'profile_completed' => false, // User wajib setup profile
+                'profile_completed' => false,
             ]);
 
             Auth::login($user);
