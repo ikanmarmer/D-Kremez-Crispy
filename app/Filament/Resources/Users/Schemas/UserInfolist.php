@@ -174,10 +174,19 @@ class UserInfolist
 
                             TextEntry::make('testimonial.rating')
                                 ->label('Rating')
+                                ->numeric()
                                 ->badge()
-                                ->color('primary')
-                                ->icon('heroicon-s-star')
-                                ->formatStateUsing(fn($state) => "{$state}/5"),
+                                ->color(fn(int $state): string => match (true) {
+                                    $state <= 2 => 'danger',
+                                    $state <= 3 => 'warning',
+                                    $state <= 4 => 'info',
+                                    $state == 5 => 'success',
+                                    default => 'gray',
+                                })
+                                ->icon(fn(int $state): string => match (true) {
+                                    $state >= 1 && $state <= 5 => 'heroicon-s-star',
+                                    default => 'heroicon-o-star',
+                                }),
 
                             TextEntry::make('testimonial.created_at')
                                 ->label('Tanggal Dibuat')
@@ -200,10 +209,12 @@ class UserInfolist
                 ->visible(fn($record) => $record->testimonial()->exists()), // ✅ Tambahkan kondisi visibilitas
 
 
-                // SECTION: Aksi (Approve / Reject)
-                Section::make('Aksi')
-                    ->icon('heroicon-o-hand-thumb-up')
-                    ->schema([
+            // SECTION: Aksi (Approve / Reject)
+            Section::make('Aksi Moderasi')
+                ->icon('heroicon-o-adjustments-horizontal')
+                ->description('Pilih tindakan untuk testimoni ini.')
+                ->schema([
+                    Flex::make([
                         Action::make('approve')
                             ->label('Setujui')
                             ->color('success')
@@ -211,9 +222,8 @@ class UserInfolist
                             ->requiresConfirmation()
                             ->action(fn($record) => $record->update([
                                 'status' => Status::Disetujui,
-                            ]))
-                            // ✅ Hanya tampilkan jika statusnya 'Menunggu'
-                            ->visible(fn($record) => $record->status === Status::Menunggu),
+                            ])),
+
 
                         Action::make('reject')
                             ->label('Tolak')
@@ -222,13 +232,13 @@ class UserInfolist
                             ->requiresConfirmation()
                             ->action(fn($record) => $record->update([
                                 'status' => Status::Ditolak,
-                            ]))
-                            // ✅ Hanya tampilkan jika statusnya 'Menunggu'
-                            ->visible(fn($record) => $record->status === Status::Menunggu),
-                    ])
-                    // ✅ Tambahkan kondisi visibilitas untuk Section
-                    ->visible(fn($record) => $record->status === Status::Menunggu),
-                            ]);
+                            ])),
+
+                    ])->gap(3), // ✅ jarak antar tombol
+                ])
+                ->columns(2)
+                ->hidden(fn($record) => in_array($record->status, [Status::Disetujui, Status::Ditolak])),
+        ]);
 
     }
 }
