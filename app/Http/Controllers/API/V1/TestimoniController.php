@@ -22,6 +22,8 @@ class TestimoniController extends Controller
             'rating' => $testimoni->rating,
             'content' => $testimoni->content,
             'status' => $testimoni->status,
+            'created_at' => $testimoni->created_at?->toISOString(),
+            'updated_at' => $testimoni->updated_at?->toISOString(),
             'user' => [
                 'name' => $testimoni->user->name,
                 'role' => $testimoni->user->role,
