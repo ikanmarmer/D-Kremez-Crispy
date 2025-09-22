@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('testimoni', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('id_user')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('avatar')->nullable();
             $table->decimal('rating', 2, 1)->unsigned();
