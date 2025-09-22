@@ -14,9 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('rekap_harian_id')->constrained('rekap_harians')->onDelete('cascade');
             $table->foreignId('produk_id')->constrained('produk')->onDelete('cascade');
-            $table->integer('jumlah_terjual')->default(0);
-            $table->integer('sisa_stok')->default(0);
-            $table->decimal('subtotal_omzet', 14, 2)->default(0);
+            $table->integer('jumlah_terjual');
             $table->timestamps();
         });
 

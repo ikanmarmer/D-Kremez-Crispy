@@ -16,6 +16,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Select;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 
 class ProdukRekapHarianRelationManager extends RelationManager
 {
@@ -26,25 +28,16 @@ class ProdukRekapHarianRelationManager extends RelationManager
         return $schema
             ->components([
                 Select::make('produk_id')
+                    ->placeholder('Pilih Produk')
                     ->relationship('produk', 'nama')
-                    ->required(),
-                TextInput::make('stok_awal')
+                    ->preload()
                     ->required()
-                    ->numeric()
-                    ->default(0),
+                    ->searchable(),
                 TextInput::make('jumlah_terjual')
-                    ->required()
                     ->numeric()
-                    ->default(0),
-                TextInput::make('sisa_stok')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('subtotal_omzet')
-                    ->required()
-                    ->numeric()
-                    ->default(0.0),
+                    ->required(),
             ]);
+
     }
 
     public function table(Table $table): Table
@@ -52,30 +45,16 @@ class ProdukRekapHarianRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('produk.nama')
             ->columns([
-                TextColumn::make('produk_id')
+                TextColumn::make('produk.nama')
                     ->label('Produk')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('stok_awal')
-                    ->numeric()
-                    ->sortable(),
+                    ->searchable(),
                 TextColumn::make('jumlah_terjual')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('sisa_stok')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('subtotal_omzet')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Jumlah Terjual')
+                    ->numeric(),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Dibuat')
+                    ->dateTime('d M Y H:i')
+                    ->sortable(),
             ])
             ->filters([
                 //

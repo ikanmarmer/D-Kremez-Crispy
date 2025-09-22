@@ -16,7 +16,7 @@ Route::prefix('v1')->group(function () {
         ->controller(AuthController::class)
         ->group(function () {
             Route::middleware('auth:sanctum')->group(function () {
-                Route::get('/setup-profile', 'setupProfile');
+                Route::post('/setup-profile', 'setupProfile');
                 Route::post('/logout', 'logout');
                 Route::get('/profile', 'profile');
                 Route::post('/upload-avatar', 'uploadAvatar');
@@ -25,7 +25,6 @@ Route::prefix('v1')->group(function () {
                 Route::post('/change-password', 'changePassword');
             });
 
-            // Public routes
             Route::post('/register', [AuthController::class, 'register']);
             Route::post('/login', [AuthController::class, 'login']);
             Route::post('/verify-code', [AuthController::class, 'verifyCode']);

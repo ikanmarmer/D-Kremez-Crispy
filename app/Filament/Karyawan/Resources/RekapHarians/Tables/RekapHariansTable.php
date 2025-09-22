@@ -22,15 +22,16 @@ class RekapHariansTable
                 TextColumn::make('tanggal')
                     ->date()
                     ->sortable(),
-                TextColumn::make('total_produk_terjual')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('total_omzet')
                     ->numeric()
                     ->sortable()
                     ->money('idr', true),
-                TextColumn::make('produk_terlaris')
-                    ->searchable(),
+                TextColumn::make('jumlah_pelanggan')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('total_pengeluaran')
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

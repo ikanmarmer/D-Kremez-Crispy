@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->string('role')->default('User');
             $table->string('avatar')->nullable();
-            $table->boolean('profile_completed')->default(false);
+            $table->boolean('profile_completed')->default(false); 
             $table->rememberToken();
             $table->timestamps();
         });

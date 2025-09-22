@@ -12,15 +12,11 @@ class Produk extends Model
     protected $table = 'produk';
 
     public $timestamps = true;
-    
-    const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
         'nama',
         'kode_produk',
         'harga',
-        'stok',
         'image',
         'aktif',
     ];
@@ -28,8 +24,6 @@ class Produk extends Model
     protected $casts = [
         'harga' => 'decimal:2',
         'aktif' => 'boolean',
-        'dibuat_pada' => 'datetime',
-        'diperbarui_pada' => 'datetime',
     ];
 
     public function detailLaporanPenjualan()
@@ -44,9 +38,11 @@ class Produk extends Model
     public function rekapHarians()
     {
         return $this->belongsToMany(RekapHarian::class, 'produk_rekap_harian')
-                    ->withPivot('stok')
+                    ->withPivot('jumlah_terjual')
                     ->withTimestamps();
-        }
-
-
+    }
+     public function produkRekapHarians()
+    {
+        return $this->hasMany(ProdukRekapHarian::class, 'produk_id', 'id');
+    }
 }
