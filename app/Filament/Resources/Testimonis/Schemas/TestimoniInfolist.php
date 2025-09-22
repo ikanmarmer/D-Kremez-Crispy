@@ -13,6 +13,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Flex;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
+use Filament\Notifications\Notification;
 use Filament\Actions\Action;
 
 class TestimoniInfolist
@@ -21,7 +22,10 @@ class TestimoniInfolist
     {
         return $schema
             ->components([
-                // SECTION: Informasi Pengguna
+
+                /**
+                 * 🧑 Profile Card Layout
+                 */
                 Section::make('Informasi Pengguna')
                     ->icon('heroicon-o-user-circle')
                     ->description('Detail pengguna yang memberikan testimoni')
@@ -56,7 +60,7 @@ class TestimoniInfolist
                                     ->copyable()
                                     ->copyMessage('Email disalin!')
                                     ->extraAttributes([
-                                        'class' => 'text-base text-gray-600 dark:text-gray-300 mb-3'
+                                        'class' => 'text-sm font-medium text-gray-700 dark:text-gray-200',
                                     ]),
 
                                 TextEntry::make('user.role')
@@ -84,7 +88,9 @@ class TestimoniInfolist
                             ->from('md'),
                     ]),
 
-                // SECTION: Detail Testimoni
+                /**
+                 * 📊 Grid Metadata Layout
+                 */
                 Section::make('Detail Testimoni')
                     ->icon('heroicon-o-clipboard-document-list')
                     ->description('Status dan informasi teknis testimoni')
@@ -94,9 +100,7 @@ class TestimoniInfolist
                                 TextEntry::make('status')
                                     ->label('Status')
                                     ->badge()
-                                    // handle enum or string safely
                                     ->icon(fn($state): string => match (
-                                    // normalize to string value
                                     $state instanceof Status ? $state->value : (string) $state
                                 ) {
                                         Status::Menunggu->value => 'heroicon-m-clock',
@@ -131,6 +135,8 @@ class TestimoniInfolist
 
                                 IconEntry::make('is_notified')
                                     ->label('Sudah Dilihat Pengguna?')
+                                    ->trueIcon('heroicon-m-eye')
+                                    ->falseIcon('heroicon-m-eye-slash')
                                     ->boolean(),
 
                                 TextEntry::make('created_at')
@@ -152,7 +158,9 @@ class TestimoniInfolist
                             ]),
                     ]),
 
-                // SECTION: Foto Produk
+                /**
+                 * 🖼️ Hero Image Layout
+                 */
                 Section::make('Foto Produk')
                     ->icon('heroicon-o-photo')
                     ->schema([
@@ -168,9 +176,12 @@ class TestimoniInfolist
                             ->columnSpanFull(),
                     ]),
 
-                // SECTION: Isi Testimoni
+                /**
+                 * 📝 Expandable Content Section
+                 */
                 Section::make('Isi Testimoni')
                     ->icon('heroicon-o-chat-bubble-bottom-center-text')
+                    ->collapsible() // 🔽 isi bisa dilipat
                     ->schema([
                         TextEntry::make('content')
                             ->label('Testimoni')
@@ -178,8 +189,10 @@ class TestimoniInfolist
                             ->prose()
                             ->columnSpanFull(),
                     ]),
-
-                Section::make('Aksi Moderasi')
+                /**
+                 * 🎛️ Action Bar (Moderation Controls)
+                 */
+                Section::make('Moderasi')
                     ->icon('heroicon-o-adjustments-horizontal')
                     ->description('Pilih tindakan untuk testimoni ini.')
                     ->schema([
@@ -189,24 +202,37 @@ class TestimoniInfolist
                                 ->color('success')
                                 ->icon('heroicon-m-check-circle')
                                 ->requiresConfirmation()
-                                ->action(fn($record) => $record->update([
-                                    'status' => Status::Disetujui,
-                                ])),
+                                ->action(function ($record) {
+                                    $record->update([
+                                        'status' => Status::Disetujui,
+                                    ]);
 
-                                
+                                    Notification::make()
+                                        ->title('Testimoni berhasil disetujui.')
+                                        ->success()
+                                        ->send();
+                                }),
+
                             Action::make('reject')
                                 ->label('Tolak')
                                 ->color('danger')
                                 ->icon('heroicon-m-x-circle')
                                 ->requiresConfirmation()
-                                ->action(fn($record) => $record->update([
-                                    'status' => Status::Ditolak,
-                                ])),
+                                ->action(function ($record) {
+                                    $record->update([
+                                        'status' => Status::Ditolak,
+                                    ]);
 
-                        ])->gap(3), // ✅ jarak antar tombol
+                                    Notification::make()
+                                        ->title('Testimoni berhasil ditolak.')
+                                        ->danger()
+                                        ->send();
+                                }),
+                        ])->gap(3), // jarak antar tombol
                     ])
                     ->columns(2)
-                    ->hidden(fn($record) => in_array($record->status, [Status::Disetujui, Status::Ditolak])),
+                    ->visible(fn($record) =>
+                        $record->status === 'Menunggu'),
             ]);
     }
 }

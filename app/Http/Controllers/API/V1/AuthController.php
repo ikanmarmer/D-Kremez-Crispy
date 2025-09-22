@@ -12,36 +12,29 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
-    private function formatUserResponse(User $user): array
+    private function makeAvatarUrl(?string $path): ?string
     {
-        $avatarUrl = $user->avatar ? URL::to(Storage::url($user->avatar)) : null;
-
-        return array_merge(
-            $user->only(['id', 'name', 'email', 'role', 'created_at', 'updated_at']),
-            [
-                'avatar' => $user->avatar,
-                'avatar_url' => $avatarUrl,
-            ]
-        );
+        return $path ? URL::to(Storage::url($path)) : null;
     }
 
-    private function uploadAvatar(Request $request): ?string
+    // public endpoint untuk upload avatar terpisah (route Anda menunjuk ini)
+    public function uploadAvatar(Request $request)
     {
-        if (!$request->hasFile('avatar')) {
-            return null;
-        }
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB limit
+        ]);
 
-        return $request->file('avatar')->store('avatars', 'public');
-    }
+        $path = $request->file('avatar')->store('avatars', 'public');
 
-    private function deleteAvatarFile(?string $avatarPath): void
-    {
-        if ($avatarPath) {
-            Storage::disk('public')->delete($avatarPath);
-        }
+        return response()->json([
+            'message' => 'Avatar uploaded.',
+            'avatar' => $path,
+            'avatar_url' => $this->makeAvatarUrl($path),
+        ], 201);
     }
 
     public function register(Request $request)
@@ -49,26 +42,45 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'password' => 'required|string|min:8|confirmed',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => Role::User,
-            'avatar' => $this->uploadAvatar($request),
-        ]);
+        DB::beginTransaction();
+        try {
+            $avatarPath = $request->hasFile('avatar')
+                ? $request->file('avatar')->store('avatars', 'public')
+                : null;
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role' => Role::User,
+                'avatar' => $avatarPath,
+            ]);
 
-        return response()->json([
-            'message' => 'Pendaftaran pengguna berhasil',
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $this->formatUserResponse($user),
-        ], 201);
+            $token = $user->createToken('auth_token')->plainTextToken;
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Pendaftaran pengguna berhasil',
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => $user->makeVisible(['avatar'])->only(['id', 'name', 'email', 'role', 'created_at', 'updated_at']) + [
+                    'avatar' => $user->avatar,
+                    'avatar_url' => $this->makeAvatarUrl($user->avatar),
+                ],
+            ], 201);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            // jika file sudah tersimpan dan transaksi gagal, hapus file agar tidak orphan
+            if (!empty($avatarPath)) {
+                Storage::disk('public')->delete($avatarPath);
+            }
+            Log::error('Register failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Pendaftaran gagal'], 500);
+        }
     }
 
     public function login(Request $request)
@@ -94,21 +106,42 @@ class AuthController extends Controller
             'message' => 'Berhasil masuk',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $this->formatUserResponse($user),
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'avatar' => $user->avatar,
+                'avatar_url' => $this->makeAvatarUrl($user->avatar),
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ],
         ]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-
+        $token = $request->user()->currentAccessToken();
+        if ($token) {
+            $token->delete();
+        }
         return response()->json(['message' => 'Berhasil keluar']);
     }
 
     public function profile(Request $request)
     {
+        $user = $request->user();
         return response()->json([
-            'user' => $this->formatUserResponse($request->user()),
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'avatar' => $user->avatar,
+                'avatar_url' => $this->makeAvatarUrl($user->avatar),
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ],
         ]);
     }
 
@@ -118,28 +151,48 @@ class AuthController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user)],
+            'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        $data = $request->only('name', 'email');
+        DB::beginTransaction();
+        try {
+            $data = $request->only('name', 'email');
 
-        if ($request->hasFile('avatar')) {
-            $this->deleteAvatarFile($user->avatar);
-            $data['avatar'] = $this->uploadAvatar($request);
+            if ($request->hasFile('avatar')) {
+                // hapus file lama kalau ada
+                if ($user->avatar) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+                $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            }
+
+            if (!empty($validated['password'])) {
+                $data['password'] = Hash::make($validated['password']);
+            }
+
+            $user->update($data);
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Profil berhasil diperbarui',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'avatar' => $user->avatar,
+                    'avatar_url' => $this->makeAvatarUrl($user->avatar),
+                    'created_at' => $user->created_at,
+                    'updated_at' => $user->updated_at,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Update profile failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal memperbarui profil'], 500);
         }
-
-        if (!empty($validated['password'])) {
-            $data['password'] = Hash::make($validated['password']);
-        }
-
-        $user->update($data);
-
-        return response()->json([
-            'message' => 'Profil berhasil diperbarui',
-            'user' => $this->formatUserResponse($user),
-        ]);
     }
 
     public function deleteAvatar(Request $request)
@@ -147,9 +200,8 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user->avatar) {
-            $this->deleteAvatarFile($user->avatar);
+            Storage::disk('public')->delete($user->avatar);
             $user->update(['avatar' => null]);
-
             return response()->json(['message' => 'Avatar berhasil dihapus']);
         }
 
@@ -175,5 +227,4 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Password berhasil diubah']);
     }
-
 }

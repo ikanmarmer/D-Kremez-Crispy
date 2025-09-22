@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Produks\Schemas;
 
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
 class ProdukInfolist
@@ -10,7 +13,19 @@ class ProdukInfolist
     {
         return $schema
             ->components([
-                //
+                TextEntry::make('nama'),
+                TextEntry::make('harga')
+                    ->numeric(),
+                TextEntry::make('stok')
+                    ->numeric(),
+                ImageEntry::make('image')
+                    ->placeholder('-'),
+                TextEntry::make('dibuat_pada')
+                    ->dateTime(),
+                TextEntry::make('diperbarui_pada')
+                    ->dateTime(),
+                IconEntry::make('aktif')
+                    ->boolean(),
             ]);
     }
 }

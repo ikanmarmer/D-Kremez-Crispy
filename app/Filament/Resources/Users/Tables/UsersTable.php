@@ -24,7 +24,7 @@ class UsersTable
                     ->label('Avatar')
                     ->disk('public')
                     ->extraImgAttributes([
-                        'class' => 'w-full h-full rounded-lg object-cover shadow-md', 
+                        'class' => 'w-full h-full rounded-lg object-cover shadow-md',
                         'alt' => 'Avatar Pengguna',
                     ])
                     ->height(100)
@@ -41,8 +41,7 @@ class UsersTable
                     ->label('Email')
                     ->searchable()
                     ->copyable()
-                    ->limit(30)
-                    ->tooltip(fn($state) => $state),
+                    ->limit(30),
 
                 // Role
                 TextColumn::make('role')
@@ -90,11 +89,18 @@ class UsersTable
             ->recordActions([
                 ViewAction::make()->label('Lihat'),
                 EditAction::make()->label('Edit'),
-                DeleteAction::make()->label('Hapus'),
+                DeleteAction::make()->label('Hapus')
+                    ->requiresConfirmation()
+                    ->modalHeading('Hapus Pengguna')
+                    ->modalSubheading('Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Hapus')
+                        ->requiresConfirmation()
+                        ->modalHeading('Hapus Pengguna')
+                        ->modalSubheading('Apakah Anda yakin ingin menghapus pengguna yang dipilih? Tindakan ini tidak dapat dibatalkan.'),
                 ]),
             ])
             ->selectCurrentPageOnly();
