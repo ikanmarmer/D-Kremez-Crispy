@@ -60,9 +60,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
      */
 
     public function testimonial()
-    {
-        return $this->hasMany(Testimoni::class, 'id_users');
-    }
+{
+    return $this->hasOne(\App\Models\Testimoni::class, 'user_id');
+    // foreign key harus 'user_id' sesuai migration
+}
 
     public function laporan()
     {
@@ -72,7 +73,6 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function verifikasiAdmin()
     {
         return $this->hasMany(Verifikasi::class, 'id_admin');
-        return $this->hasMany(Testimoni::class);
     }
 
     public function rekapHarians()

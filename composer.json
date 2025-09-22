@@ -15,7 +15,7 @@
         "filament/filament": "^4.0",
         "illuminate/validation": "*",
         "laravel/framework": "^12.0",
-        "laravel/passport": "^13.2",
+        "laravel/passport": "13",
         "laravel/sanctum": "^4.2",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1",
