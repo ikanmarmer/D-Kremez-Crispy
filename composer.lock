@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a0fc51c5345171cd4026696475f5b1ff",
+    "content-hash": "cfd4e1fbe9837164586f9f6b262b53ae",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2473,16 +2473,16 @@
         },
         {
             "name": "laravel/passport",
-            "version": "v13.2.1",
+            "version": "v13.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/passport.git",
-                "reference": "8152e794698e0ddbf87f56f2bd428c4fc20e2dde"
+                "reference": "1d89db335f9b6628f5ebeca8b64e3f7cbd89ec8b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/passport/zipball/8152e794698e0ddbf87f56f2bd428c4fc20e2dde",
-                "reference": "8152e794698e0ddbf87f56f2bd428c4fc20e2dde",
+                "url": "https://api.github.com/repos/laravel/passport/zipball/1d89db335f9b6628f5ebeca8b64e3f7cbd89ec8b",
+                "reference": "1d89db335f9b6628f5ebeca8b64e3f7cbd89ec8b",
                 "shasum": ""
             },
             "require": {
@@ -2546,7 +2546,7 @@
                 "issues": "https://github.com/laravel/passport/issues",
                 "source": "https://github.com/laravel/passport"
             },
-            "time": "2025-09-15T20:48:33+00:00"
+            "time": "2025-04-25T15:55:24+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -4893,16 +4893,16 @@
         },
         {
             "name": "phiki/phiki",
-            "version": "v2.0.2",
+            "version": "v2.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phikiphp/phiki.git",
-                "reference": "6d735108238c03daaaef571448d8dee8187cab5e"
+                "reference": "fe51fe6dc31856cd776fd1b04ee74053a4271644"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phikiphp/phiki/zipball/6d735108238c03daaaef571448d8dee8187cab5e",
-                "reference": "6d735108238c03daaaef571448d8dee8187cab5e",
+                "url": "https://api.github.com/repos/phikiphp/phiki/zipball/fe51fe6dc31856cd776fd1b04ee74053a4271644",
+                "reference": "fe51fe6dc31856cd776fd1b04ee74053a4271644",
                 "shasum": ""
             },
             "require": {
@@ -4948,7 +4948,7 @@
             "description": "Syntax highlighting using TextMate grammars in PHP.",
             "support": {
                 "issues": "https://github.com/phikiphp/phiki/issues",
-                "source": "https://github.com/phikiphp/phiki/tree/v2.0.2"
+                "source": "https://github.com/phikiphp/phiki/tree/v2.0.3"
             },
             "funding": [
                 {
@@ -4960,7 +4960,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-09-17T18:32:40+00:00"
+            "time": "2025-09-19T11:50:41+00:00"
         },
         {
             "name": "php-http/discovery",

@@ -16,7 +16,7 @@ Route::prefix('v1')->group(function () {
         ->controller(AuthController::class)
         ->group(function () {
             Route::middleware('auth:sanctum')->group(function () {
-                Route::get('/setup-profile', 'setupProfile');
+                Route::post('/setup-profile', 'setupProfile');
                 Route::post('/logout', 'logout');
                 Route::get('/profile', 'profile');
                 Route::post('/upload-avatar', 'uploadAvatar');
