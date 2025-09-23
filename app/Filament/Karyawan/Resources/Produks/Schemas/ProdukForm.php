@@ -15,6 +15,7 @@ class ProdukForm
         return $schema
             ->components([
                 TextInput::make('nama')
+                    ->label('Nama Produk')
                     ->required(),
                 TextInput::make('harga')
                     ->required()
@@ -25,12 +26,12 @@ class ProdukForm
                     ->default(0),
                 FileUpload::make('image')
                     ->image(),
-                    DateTimePicker::make('dibuat_pada')
+                DateTimePicker::make('dibuat_pada')
                     ->required(),
-                    DateTimePicker::make('diperbarui_pada')
+                DateTimePicker::make('diperbarui_pada')
                     ->required(),
-                    Toggle::make('aktif')
-                        ->required(),
+                Toggle::make('aktif')
+                    ->required(),
             ]);
     }
 }

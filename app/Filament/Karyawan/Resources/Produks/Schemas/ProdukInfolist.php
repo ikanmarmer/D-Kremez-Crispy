@@ -18,11 +18,12 @@ class ProdukInfolist
                     ->numeric(),
                 TextEntry::make('stok')
                     ->numeric(),
-                ImageEntry::make('image'),
+                ImageEntry::make('image')
+                    ->placeholder('-'),
                 TextEntry::make('dibuat_pada')
-                ->dateTime(),
+                    ->dateTime(),
                 TextEntry::make('diperbarui_pada')
-                ->dateTime(),
+                    ->dateTime(),
                 IconEntry::make('aktif')
                     ->boolean(),
             ]);

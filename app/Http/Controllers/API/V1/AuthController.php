@@ -9,85 +9,170 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
+use App\Mail\VerificationCodeMail;
 
 class AuthController extends Controller
 {
-    private function makeAvatarUrl(?string $path): ?string
+    /**
+     * Helper format user response.
+     */
+    private function formatUserResponse(User $user): array
     {
-        return $path ? URL::to(Storage::url($path)) : null;
+        $avatarUrl = $user->avatar ? URL::to(Storage::url($user->avatar)) : null;
+
+        return array_merge(
+            $user->only(['id', 'name', 'email', 'role', 'created_at', 'updated_at']),
+            [
+                'avatar' => $user->avatar,
+                'avatar_url' => $avatarUrl,
+            ]
+        );
     }
 
-    // public endpoint untuk upload avatar terpisah (route Anda menunjuk ini)
-    public function uploadAvatar(Request $request)
+    private function uploadAvatar(Request $request): ?string
     {
-        $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB limit
-        ]);
-
-        $path = $request->file('avatar')->store('avatars', 'public');
-
-        return response()->json([
-            'message' => 'Avatar uploaded.',
-            'avatar' => $path,
-            'avatar_url' => $this->makeAvatarUrl($path),
-        ], 201);
+        if (!$request->hasFile('avatar')) {
+            return null;
+        }
+        return $request->file('avatar')->store('avatars', 'public');
     }
 
-    public function register(Request $request)
+    private function deleteAvatarFile(?string $avatarPath): void
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
-        ]);
-
-        DB::beginTransaction();
-        try {
-            $avatarPath = $request->hasFile('avatar')
-                ? $request->file('avatar')->store('avatars', 'public')
-                : null;
-
-            $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'role' => Role::User,
-                'avatar' => $avatarPath,
-            ]);
-
-            $token = $user->createToken('auth_token')->plainTextToken;
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Pendaftaran pengguna berhasil',
-                'access_token' => $token,
-                'token_type' => 'Bearer',
-                'user' => $user->makeVisible(['avatar'])->only(['id', 'name', 'email', 'role', 'created_at', 'updated_at']) + [
-                    'avatar' => $user->avatar,
-                    'avatar_url' => $this->makeAvatarUrl($user->avatar),
-                ],
-            ], 201);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            // jika file sudah tersimpan dan transaksi gagal, hapus file agar tidak orphan
-            if (!empty($avatarPath)) {
-                Storage::disk('public')->delete($avatarPath);
-            }
-            Log::error('Register failed: ' . $e->getMessage());
-            return response()->json(['message' => 'Pendaftaran gagal'], 500);
+        if ($avatarPath) {
+            Storage::disk('public')->delete($avatarPath);
         }
     }
 
+    /**
+     * REGISTER - hanya email, kirim kode verifikasi.
+     */
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255|unique:users',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $user = User::create([
+            'email' => $request->email,
+            'email_verification_code' => $verificationCode,
+            'profile_completed' => false,
+            'role' => Role::User,
+        ]);
+
+        Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.',
+            'user' => $this->formatUserResponse($user),
+        ], 201);
+    }
+
+    /**
+     * VERIFY EMAIL CODE
+     */
+    public function verifyCode(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+            'code' => 'required|string|size:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || $request->code !== $user->email_verification_code) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode verifikasi salah.',
+            ], 400);
+        }
+
+        $user->email_verified_at = now();
+        $user->email_verification_code = null;
+        $user->save();
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Email berhasil diverifikasi.',
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'requires_setup' => true,
+            'user' => $this->formatUserResponse($user),
+        ]);
+    }
+
+    /**
+     * RESEND VERIFICATION CODE
+     */
+    public function resendVerificationCode(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email tidak valid.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user->email_verified_at) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email sudah terverifikasi.',
+            ], 400);
+        }
+
+        $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $user->email_verification_code = $verificationCode;
+        $user->save();
+
+        Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode verifikasi baru telah dikirim ke email Anda.',
+        ]);
+    }
+
+    /**
+     * LOGIN
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => 'required|string|min:8',
         ]);
 
         if (!Auth::attempt($credentials)) {
@@ -96,111 +181,130 @@ class AuthController extends Controller
                 'ip' => $request->ip(),
                 'time' => now(),
             ]);
-            return response()->json(['message' => 'Email atau kata sandi salah'], 401);
+            return response()->json(['success' => false, 'message' => 'Email atau password salah.'], 401);
         }
 
         $user = Auth::user();
+
+        if (!$user->email_verified_at) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Silakan verifikasi email Anda terlebih dahulu.',
+                'requires_verification' => true,
+                'email' => $user->email,
+            ], 403);
+        }
+
+        if (!$user->profile_completed) {
+            $token = $user->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'success' => false,
+                'message' => 'Silakan lengkapi profil Anda.',
+                'requires_setup' => true,
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ], 403);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Berhasil masuk',
+            'success' => true,
+            'message' => 'Login berhasil.',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'avatar' => $user->avatar,
-                'avatar_url' => $this->makeAvatarUrl($user->avatar),
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
-            ],
+            'user' => $this->formatUserResponse($user),
         ]);
     }
 
-    public function logout(Request $request)
-    {
-        $token = $request->user()->currentAccessToken();
-        if ($token) {
-            $token->delete();
-        }
-        return response()->json(['message' => 'Berhasil keluar']);
-    }
-
-    public function profile(Request $request)
+    /**
+     * SETUP PROFILE
+     */
+    public function setupProfile(Request $request)
     {
         $user = $request->user();
+
+        if ($user->profile_completed) {
+            return response()->json(['success' => false, 'message' => 'Profil sudah pernah dilengkapi.'], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Validasi gagal.', 'errors' => $validator->errors()], 422);
+        }
+
+        $user->name = $request->name;
+        $user->password = Hash::make($request->password);
+        $user->profile_completed = true;
+        $user->save();
+
         return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'avatar' => $user->avatar,
-                'avatar_url' => $this->makeAvatarUrl($user->avatar),
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
-            ],
+            'success' => true,
+            'message' => 'Profil berhasil dilengkapi.',
+            'user' => $this->formatUserResponse($user),
         ]);
     }
 
+    /**
+     * LOGOUT
+     */
+    public function logout(Request $request)
+    {
+        $request->user()->tokens()->delete();
+        return response()->json(['success' => true, 'message' => 'Logout berhasil (Semua token dihapus).']);
+    }
+
+    /**
+     * PROFILE
+     */
+    public function profile(Request $request)
+    {
+        return response()->json(['success' => true, 'user' => $this->formatUserResponse($request->user())]);
+    }
+
+    /**
+     * UPDATE PROFILE
+     */
     public function updateProfile(Request $request)
     {
         $user = $request->user();
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user)],
             'password' => 'nullable|string|min:8|confirmed',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        DB::beginTransaction();
-        try {
-            $data = $request->only('name', 'email');
+        $data = $request->only('name', 'email');
 
-            if ($request->hasFile('avatar')) {
-                // hapus file lama kalau ada
-                if ($user->avatar) {
-                    Storage::disk('public')->delete($user->avatar);
-                }
-                $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
-            }
-
-            if (!empty($validated['password'])) {
-                $data['password'] = Hash::make($validated['password']);
-            }
-
-            $user->update($data);
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Profil berhasil diperbarui',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                    'avatar' => $user->avatar,
-                    'avatar_url' => $this->makeAvatarUrl($user->avatar),
-                    'created_at' => $user->created_at,
-                    'updated_at' => $user->updated_at,
-                ],
-            ]);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            Log::error('Update profile failed: ' . $e->getMessage());
-            return response()->json(['message' => 'Gagal memperbarui profil'], 500);
+        if ($request->hasFile('avatar')) {
+            $this->deleteAvatarFile($user->avatar);
+            $data['avatar'] = $this->uploadAvatar($request);
         }
+
+        if (!empty($validated['password'])) {
+            $data['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($data);
+
+        return response()->json(['message' => 'Profil berhasil diperbarui', 'user' => $this->formatUserResponse($user)]);
     }
 
+    /**
+     * DELETE AVATAR
+     */
     public function deleteAvatar(Request $request)
     {
         $user = $request->user();
 
         if ($user->avatar) {
-            Storage::disk('public')->delete($user->avatar);
+            $this->deleteAvatarFile($user->avatar);
             $user->update(['avatar' => null]);
             return response()->json(['message' => 'Avatar berhasil dihapus']);
         }
@@ -208,6 +312,9 @@ class AuthController extends Controller
         return response()->json(['message' => 'Tidak ada avatar untuk dihapus'], 404);
     }
 
+    /**
+     * CHANGE PASSWORD
+     */
     public function changePassword(Request $request)
     {
         $request->validate([
@@ -221,9 +328,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Password lama salah'], 400);
         }
 
-        $user->update([
-            'password' => Hash::make($request->new_password),
-        ]);
+        $user->update(['password' => Hash::make($request->new_password)]);
 
         return response()->json(['message' => 'Password berhasil diubah']);
     }

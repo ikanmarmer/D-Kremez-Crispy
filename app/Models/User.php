@@ -9,25 +9,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory,HasApiTokens, Notifiable;
-
-    /**
-     *
-     * @var list<string>
-     */
+    use HasFactory, HasApiTokens, Notifiable;
 
     protected $guarded = ['id'];
 
     protected $fillable = [
         'name',
         'email',
+        'email_verified_at',
+        'email_verification_code',
         'password',
         'role',
         'avatar',
+        'profile_completed',
     ];
 
     protected $hidden = [
@@ -35,32 +33,19 @@ class User extends Authenticatable implements FilamentUser
         'password',
     ];
 
-
-    /**
-     * Get the attributes that should be cast.
-    *
-    * @return array<string, string>
-    */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => Role::class,
+            'profile_completed' => 'boolean',
         ];
     }
 
     /**
-     *
-     * @return array<string, string>
+     * Filament Panel Access
      */
-
-    /**
-     *
-     * @return Role
-     */
-
-
     public function canAccessPanel(Panel $panel): bool
     {
         return match ($panel->getId()) {
@@ -71,13 +56,23 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     *
-     * @var list<string>
-    */
+     * Relationships
+     */
 
     public function testimonial()
+{
+    return $this->hasOne(\App\Models\Testimoni::class, 'user_id');
+    // foreign key harus 'user_id' sesuai migration
+}
+
+    public function laporan()
     {
-        return $this->hasMany(Testimoni::class);
+        return $this->hasMany(LaporanPenjualan::class, 'id_users');
+    }
+
+    public function verifikasiAdmin()
+    {
+        return $this->hasMany(Verifikasi::class, 'id_admin');
     }
 
     public function rekapHarians()
