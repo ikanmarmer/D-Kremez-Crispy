@@ -128,7 +128,7 @@ class TestimoniController extends Controller
 
         $validated = $request->validate([
             'rating' => 'required|numeric|min:1|max:5',
-            'content' => 'required|string|max:1000',
+            'content' => 'required|string|max:150',
             'product_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
         ]);
 
@@ -143,13 +143,11 @@ class TestimoniController extends Controller
                 $testimoni->product_photo = $request->file('product_photo')->store('testimonials/product-photos', 'public');
             }
 
-            $statusChanged = $testimoni->status !== Status::Menunggu;
-
             $testimoni->update([
                 'rating' => $validated['rating'],
                 'content' => $validated['content'],
                 'status' => Status::Menunggu,
-                'is_notified' => $statusChanged ? false : $testimoni->is_notified,
+                'is_notified' => false, // Always reset notification when user updates
             ]);
 
             return response()->json([

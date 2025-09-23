@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\Role;
 use App\Enums\Status;
+use App\Models\Testimoni;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\IconEntry;
@@ -56,7 +57,7 @@ class UserInfolist
                                     'class' => 'text-2xl font-bold text-gray-900 dark:text-white mb-2'
                                 ]),
 
-                            TextEntry::make('user.email')
+                            TextEntry::make('email')
                                 ->label('Alamat Email')
                                 ->icon('heroicon-m-envelope')
                                 ->copyable()
@@ -121,15 +122,31 @@ class UserInfolist
                         ->columnSpan(1),
                 ]),
 
+            // Section: Foto Produk. Menggunakan ->hidden()
+            Section::make('Foto Produk')
+                ->icon('heroicon-o-photo')
+                ->hidden(fn($record) => $record->testimonial === null)
+                ->schema([
+                    ImageEntry::make('testimonial.product_photo')
+                        ->disk('public')
+                        ->label('Foto Produk')
+                        ->placeholder('Tidak ada foto produk')
+                        ->height(300)
+                        ->extraImgAttributes([
+                            'class' => 'w-full h-full max-w-md mx-auto rounded-lg object-cover shadow-md',
+                            'alt' => 'Foto Produk',
+                        ])
+                        ->columnSpanFull(),
+                ]),
+
             // Section: Testimoni. Menggunakan ->hidden() untuk menyembunyikan jika tidak ada testimoni.
             Section::make('Detail Testimoni')
                 ->icon('heroicon-o-clipboard-document-list')
                 ->description('Status dan informasi teknis testimoni')
-                ->hidden(fn($record) => $record->testimonial->isEmpty())
                 ->schema([
                     Grid::make()
                         ->schema([
-                            TextEntry::make('status')
+                            TextEntry::make('testimonial.status')
                                 ->label('Status')
                                 ->badge()
                                 ->icon(fn($state): string => match (
@@ -149,7 +166,7 @@ class UserInfolist
                                     default => 'secondary',
                                 }),
 
-                            TextEntry::make('rating')
+                            TextEntry::make('testimonial.rating')
                                 ->label('Rating')
                                 ->numeric()
                                 ->badge()
@@ -165,19 +182,17 @@ class UserInfolist
                                     default => 'heroicon-o-star',
                                 }),
 
-                            IconEntry::make('is_notified')
+                            IconEntry::make('testimonial.is_notified')
                                 ->label('Sudah Dilihat Pengguna?')
-                                ->trueIcon('heroicon-m-eye')
-                                ->falseIcon('heroicon-m-eye-slash')
                                 ->boolean(),
 
-                            TextEntry::make('created_at')
+                            TextEntry::make('testimonial.created_at')
                                 ->label('Tanggal Dibuat')
                                 ->dateTime()
                                 ->icon('heroicon-m-plus-circle')
                                 ->placeholder('-'),
 
-                            TextEntry::make('updated_at')
+                            TextEntry::make('testimonial.updated_at')
                                 ->label('Tanggal Diperbarui')
                                 ->dateTime()
                                 ->icon('heroicon-m-pencil-square')
@@ -189,42 +204,24 @@ class UserInfolist
                             'lg' => 3,
                         ]),
                 ]),
-
-            // Section: Foto Produk. Menggunakan ->hidden()
-            Section::make('Foto Produk')
-                ->icon('heroicon-o-photo')
-                ->hidden(fn($record) => $record->testimonial->isEmpty())
-                ->schema([
-                    ImageEntry::make('product_photo')
-                        ->disk('public')
-                        ->label('Foto Produk')
-                        ->placeholder('Tidak ada foto produk')
-                        ->height(300)
-                        ->extraImgAttributes([
-                            'class' => 'w-full h-full max-w-md mx-auto rounded-lg object-cover shadow-md',
-                            'alt' => 'Foto Produk',
-                        ])
-                        ->columnSpanFull(),
-                ]),
-
-            // Section: Isi Testimoni. Menggunakan ->hidden()
+            // Section: Menggunakan ->hidden()
             Section::make('Isi Testimoni')
                 ->icon('heroicon-o-chat-bubble-bottom-center-text')
                 ->collapsible() // 🔽 isi bisa dilipat
-                ->hidden(fn($record) => $record->testimonial->isEmpty())
+                ->hidden(fn($record) => $record->testimonial === null)
                 ->schema([
-                    TextEntry::make('content')
+                    TextEntry::make('testimonial.content')
                         ->label('Testimoni')
                         ->markdown()
                         ->prose()
                         ->columnSpanFull(),
                 ]),
 
+
             // Section: Moderasi. Menggunakan ->hidden()
             Section::make('Moderasi')
                 ->icon('heroicon-o-adjustments-horizontal')
                 ->description('Pilih tindakan untuk testimoni ini.')
-                ->hidden(fn($record) => $record->testimonial->isEmpty())
                 ->schema([
                     Flex::make([
                         Action::make('approve')
@@ -233,7 +230,7 @@ class UserInfolist
                             ->icon('heroicon-m-check-circle')
                             ->requiresConfirmation()
                             ->action(function ($record) {
-                                $record->update([
+                                $record->testimonial?->update([
                                     'status' => Status::Disetujui,
                                 ]);
 
@@ -249,7 +246,7 @@ class UserInfolist
                             ->icon('heroicon-m-x-circle')
                             ->requiresConfirmation()
                             ->action(function ($record) {
-                                $record->update([
+                                $record->testimonial?->update([
                                     'status' => Status::Ditolak,
                                 ]);
 
@@ -261,7 +258,10 @@ class UserInfolist
                     ])->gap(3), // jarak antar tombol
                 ])
                 ->columns(2)
-                ->visible(fn($record) => $record->status === Status::Menunggu->value),
+                ->visible(
+                    fn($record) =>
+                    $record->testimonial?->status === 'Menunggu'
+                ),
         ]);
     }
 }

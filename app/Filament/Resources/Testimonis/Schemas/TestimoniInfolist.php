@@ -135,8 +135,6 @@ class TestimoniInfolist
 
                                 IconEntry::make('is_notified')
                                     ->label('Sudah Dilihat Pengguna?')
-                                    ->trueIcon('heroicon-m-eye')
-                                    ->falseIcon('heroicon-m-eye-slash')
                                     ->boolean(),
 
                                 TextEntry::make('created_at')

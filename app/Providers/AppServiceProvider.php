@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
+use Filament\Facades\Filament;
+use App\Models\Testimoni;
+use App\Observers\TestimoniObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Filament::serving(function () {
+            app()->setLocale('id');
+        });
+
+        Testimoni::observe(TestimoniObserver::class);
+
     }
 }
