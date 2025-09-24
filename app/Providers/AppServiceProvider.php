@@ -30,6 +30,5 @@ class AppServiceProvider extends ServiceProvider
 
         Testimoni::observe(TestimoniObserver::class);
 
-
     }
 }

@@ -33,15 +33,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'password',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'role' => Role::class,
-            'profile_completed' => 'boolean',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'role' => Role::class,
+        'profile_completed' => 'boolean',
+    ];
 
     /**
      * Filament Panel Access
@@ -61,8 +58,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function testimonial()
 {
-        return $this->hasOne(Testimoni::class, foreignKey: 'user_id');
-    // foreign key harus 'user_id' sesuai migration
+        return $this->hasOne(Testimoni::class, 'user_id');
+        // foreign key harus 'user_id' sesuai migration
 }
 
     public function laporan()
