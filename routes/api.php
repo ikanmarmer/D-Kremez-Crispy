@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\TestimoniController;
+use App\Http\Controllers\API\V1\NotificationController; // Tambahkan ini
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +33,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 
         });
+
     Route::prefix('testimonials')
         ->controller(TestimoniController::class)
         ->group(function () {
@@ -43,7 +44,22 @@ Route::prefix('v1')->group(function () {
                 Route::post('/mark-notified', 'markAsNotified');
                 Route::get('/my-testimonial', 'getUserTestimonial');
 
+                // Tambah routes untuk approve/reject (jika diperlukan untuk admin)
+                Route::put('/{id}/approve', 'approveTestimonial');
+                Route::put('/{id}/reject', 'rejectTestimonial');
             });
+        });
+
+    // TAMBAHKAN ROUTES UNTUK NOTIFICATIONS
+    Route::prefix('notifications')
+        ->controller(NotificationController::class)
+        ->middleware('auth:sanctum')
+        ->group(function () {
+            Route::get('/', 'index');
+            Route::get('/unread-count', 'unreadCount');
+            Route::post('/{id}/read', 'markAsRead');
+            Route::post('/read-all', 'markAllAsRead');
+            Route::delete('/{id}', 'destroy');
         });
 
 });
