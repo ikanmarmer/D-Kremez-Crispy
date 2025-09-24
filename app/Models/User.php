@@ -61,7 +61,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function testimonial()
 {
-    return $this->hasOne(\App\Models\Testimoni::class, 'user_id');
+        return $this->hasOne(Testimoni::class, foreignKey: 'user_id');
     // foreign key harus 'user_id' sesuai migration
 }
 
