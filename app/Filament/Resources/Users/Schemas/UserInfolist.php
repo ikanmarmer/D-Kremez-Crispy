@@ -33,7 +33,7 @@ class UserInfolist
                 ])
                 ->schema([
                     Flex::make([
-                        // Sub-section: Avatar
+                        // Sub-section: Avatar  
                         Section::make([
                             ImageEntry::make('avatar')
                                 ->label('')

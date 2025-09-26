@@ -7,6 +7,10 @@ use Laravel\Passport\Passport;
 use Filament\Facades\Filament;
 use App\Models\Testimoni;
 use App\Observers\TestimoniObserver;
+use App\Http\Responses\LoginResponse;
+use App\Http\Responses\LogoutResponse;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse as LoginResponseContract;
+use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
     {
         // ✅ Langsung set default keyPath, jangan cek dulu
         Passport::$keyPath = storage_path();
+
+        $this->app->bind(LoginResponseContract::class, LoginResponse::class);
+        $this->app->bind(LogoutResponseContract::class, LogoutResponse::class);
+
     }
 
     /**

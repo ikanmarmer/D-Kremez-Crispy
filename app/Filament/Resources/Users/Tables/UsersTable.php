@@ -8,6 +8,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Illuminate\Support\HtmlString;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -27,7 +28,7 @@ class UsersTable
                     ->disk('public')
                     ->height(70)
                     ->extraImgAttributes([
-                        'class' => 'cursor-pointer rounded-lg shadow-md',
+                        'class' => 'cursor-pointer rounded-lg shadow-md w-full object-contain',
                     ])
                     ->action(
                         Action::make('previewAvatar')
@@ -119,18 +120,24 @@ class UsersTable
                     ]),
             ])
             ->recordActions([
-                ViewAction::make()->label('Lihat'),
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->label('Lihat'),
 
-                EditAction::make()
-                    ->label('Edit')
-                    ->hidden(fn($record) => $record->role === Role::User),
+                    EditAction::make()
+                        ->label('Edit')
+                        ->hidden(fn($record) => $record->role === Role::User),
 
-                DeleteAction::make()
-                    ->label('Hapus')
-                    ->hidden(fn($record) => $record->role === Role::User)
-                    ->requiresConfirmation()
-                    ->modalHeading('Hapus Pengguna')
-                    ->modalSubheading('Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.'),
+                    DeleteAction::make()
+                        ->label('Hapus')
+                        ->hidden(fn($record) => $record->role === Role::User)
+                        ->requiresConfirmation()
+                        ->modalHeading('Hapus Pengguna')
+                        ->modalSubheading('Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.'),
+                ])
+                    ->color('gray')
+                    ->hidden(fn($record) => $record->role === Role::User), // sembunyikan grup untuk User
+                ViewAction::make()->label('Lihat')->visible(fn($record) => $record->role === Role::User), // User tetap bisa lihat
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -142,7 +149,9 @@ class UsersTable
                 ]),
             ])
             ->selectCurrentPageOnly()
-            // Nonaktifkan checkbox bulk action untuk user biasa
-            ->selectable(fn($record) => $record->role !== Role::User);
+            ->checkIfRecordIsSelectableUsing(
+                fn($record) => $record->role !== Role::User
+            );
+
     }
 }
