@@ -9,9 +9,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class User extends Authenticatable implements FilamentUser, MustVerifyEmail
+class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, HasApiTokens, Notifiable;
 
@@ -45,12 +44,51 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return match ($panel->getId()) {
-            'admin' => $this->role === Role::Admin,
-            'karyawan' => $this->role === Role::Karyawan,
+        $panelId = $panel->getId();
+
+        // 1) Selalu izinkan akses ke panel login supaya proses login tidak gagal
+        //    (Filament perlu mengakses halaman login / proses login itu sendiri).
+        if ($panelId === 'login') {
+            return true;
+        }
+
+        // 2) Normalisasi role dari model (bisa string, int, atau Backed Enum)
+        $role = $this->role;
+        if ($role instanceof \BackedEnum) {
+            // Enum bertipe backed (PHP 8.1+) — ambil value
+            $roleValue = $role->value;
+        } else {
+            // Sudah string/integer — gunakan langsung
+            $roleValue = $role;
+        }
+
+        // 3) Perbandingan panel -> role yang diizinkan
+        return match ($panelId) {
+            'admin' => $roleValue === Role::Admin->value,
+            'karyawan' => $roleValue === Role::Karyawan->value,
             default => false,
         };
     }
+
+    //     public function canAccessPanel(Panel $panel): bool
+    // {
+    //     // 1. Otorisasi untuk Panel Admin (misalnya, dengan ID 'admin')
+    //     if ($panel->getId() === 'admin') {
+    //         // Ganti 'isAdmin()' dengan metode atau properti yang benar untuk Role Admin Anda.
+    //         // Contoh: $this->hasRole('Admin') jika menggunakan Spatie/RolesPermissions.
+    //         // Kita larang akses jika user BUKAN Admin.
+    //         return $this->hasRole('Admin');
+    //     }
+
+    //     // 2. Otorisasi untuk Panel Karyawan (misalnya, dengan ID 'karyawan')
+    //     if ($panel->getId() === 'karyawan') {
+    //         // Kita izinkan akses jika user adalah Karyawan.
+    //         return $this->hasRole('Karyawan'); 
+    //     }
+
+    //     // Izinkan akses ke panel lain jika tidak ada batasan spesifik.
+    //     return true; 
+    // }
 
     /**
      * Relationships

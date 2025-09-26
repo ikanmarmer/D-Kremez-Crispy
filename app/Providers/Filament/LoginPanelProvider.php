@@ -16,6 +16,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Pages\Auth\Login;
 
 class LoginPanelProvider extends PanelProvider
 {
@@ -23,7 +24,8 @@ class LoginPanelProvider extends PanelProvider
     {
         return $panel
             ->id('login')
-            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->authGuard('web')
+            ->login(Login::class)
             ->colors([
                 'primary' => Color::hex('#8B4513'), // Coklat tua (seperti coklat chocolate)
                 'secondary' => Color::hex('#D2B48C'), // Coklat tan (warna krem kecoklatan)

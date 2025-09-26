@@ -12,7 +12,11 @@ use App\Filament\Pages\Auth\Login;
 | Web Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/', Login::class)->name('home');
+// Route::get('/', Login::class)->name('home');
+Route::get('/', function () {
+    return redirect()->to(url('/login'));
+})->name('home');
+
 
 Route::get('/{provider}/redirect', [SocialiteController::class, 'redirectToProvider']);
 Route::get('/{provider}/callback', [SocialiteController::class, 'handleProviderCallback']);
