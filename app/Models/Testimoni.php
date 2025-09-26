@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Status;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
@@ -27,7 +28,7 @@ class Testimoni extends Model
     ];
 
     protected $casts = [
-        'rating' => 'integer',
+        'rating' => 'decimal:1',
         'is_notified' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
@@ -35,6 +36,30 @@ class Testimoni extends Model
 
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // Relasi ke notifications
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'testimonial_id');
+    }
+
+    // Scope untuk testimoni yang disetujui
+    public function scopeApproved($query)
+    {
+        return $query->where('status', Status::Disetujui->value);
+    }
+
+    // Scope untuk testimoni yang ditolak
+    public function scopeRejected($query)
+    {
+        return $query->where('status', Status::Ditolak->value);
+    }
+
+    // Scope untuk testimoni yang menunggu
+    public function scopePending($query)
+    {
+        return $query->where('status', Status::Menunggu->value);
     }
 }

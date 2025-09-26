@@ -9,8 +9,8 @@ use App\Models\Testimoni;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class TestimoniController extends Controller
 {
@@ -169,7 +169,7 @@ class TestimoniController extends Controller
                     'testimonial_id' => $testimoni->id,
                     'dibaca' => false,
                     'data' => [
-                        'testimonial_content' => substr($validated['content'], 0, 100) . '...',
+                        'testimonial_content' => Str::limit($validated['content'], 100),
                         'rating' => $validated['rating'],
                         'action' => 'updated'
                     ]
