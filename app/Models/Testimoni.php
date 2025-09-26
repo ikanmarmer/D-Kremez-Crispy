@@ -35,30 +35,6 @@ class Testimoni extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    // Relasi ke notifications
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class);
-    }
-
-    // Scope untuk testimoni yang disetujui
-    public function scopeApproved($query)
-    {
-        return $query->where('status', 'disetujui');
-    }
-
-    // Scope untuk testimoni yang ditolak
-    public function scopeRejected($query)
-    {
-        return $query->where('status', 'ditolak');
-    }
-
-    // Scope untuk testimoni yang menunggu
-    public function scopePending($query)
-    {
-        return $query->where('status', 'menunggu');
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
     }
 }
