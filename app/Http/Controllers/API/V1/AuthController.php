@@ -15,6 +15,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Mail\VerificationCodeMail;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -75,12 +77,14 @@ class AuthController extends Controller
             'role' => Role::User,
         ]);
 
+        // Kirim email verifikasi dengan custom domain
         Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
 
         return response()->json([
             'success' => true,
             'message' => 'Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.',
             'user' => $this->formatUserResponse($user),
+            'requires_verification' => true,
         ], 201);
     }
 
@@ -115,6 +119,7 @@ class AuthController extends Controller
         $user->email_verification_code = null;
         $user->save();
 
+        // Buat token HANYA setelah verifikasi berhasil
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -122,7 +127,7 @@ class AuthController extends Controller
             'message' => 'Email berhasil diverifikasi.',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'requires_setup' => true,
+            'requires_setup' => !$user->profile_completed,
             'user' => $this->formatUserResponse($user),
         ]);
     }
@@ -166,7 +171,7 @@ class AuthController extends Controller
     }
 
     /**
-     * LOGIN
+     * LOGIN - untuk login normal, cek verifikasi dulu
      */
     public function login(Request $request)
     {
@@ -186,10 +191,18 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
+        // Cek apakah email sudah terverifikasi
         if (!$user->email_verified_at) {
+            // Kirim ulang kode verifikasi
+            $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $user->email_verification_code = $verificationCode;
+            $user->save();
+
+            Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
+
             return response()->json([
                 'success' => false,
-                'message' => 'Silakan verifikasi email Anda terlebih dahulu.',
+                'message' => 'Silakan verifikasi email Anda terlebih dahulu. Kode verifikasi baru telah dikirim.',
                 'requires_verification' => true,
                 'email' => $user->email,
             ], 403);
@@ -331,5 +344,123 @@ class AuthController extends Controller
         $user->update(['password' => Hash::make($request->new_password)]);
 
         return response()->json(['message' => 'Password berhasil diubah']);
+    }
+
+    /**
+     * GOOGLE AUTH - dengan verifikasi email
+     */
+    public function loginWithGoogle(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'access_token' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Verify Google access token
+            $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->access_token);
+
+            // Cari user berdasarkan email
+            $user = User::where('email', $googleUser->getEmail())->first();
+
+            if (!$user) {
+                // Buat user baru dengan kode verifikasi
+                $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+                $user = User::create([
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'password' => Hash::make(Str::random(16)),
+                    'avatar' => $this->storeGoogleAvatar($googleUser->getAvatar()),
+                    'email_verification_code' => $verificationCode,
+                    'email_verified_at' => null,
+                    'profile_completed' => true,
+                    'role' => Role::User,
+                ]);
+
+                // Kirim email verifikasi
+                Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Registrasi dengan Google berhasil! Silakan cek email untuk kode verifikasi.',
+                    'requires_verification' => true,
+                    'email' => $user->email,
+                    'user' => $this->formatUserResponse($user),
+                ]);
+
+            } else {
+                // User sudah ada - cek status verifikasi
+                if (!$user->email_verified_at) {
+                    // Jika email belum terverifikasi, kirim ulang kode
+                    $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                    $user->email_verification_code = $verificationCode;
+                    $user->save();
+
+                    Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Email belum terverifikasi. Kode verifikasi baru telah dikirim.',
+                        'requires_verification' => true,
+                        'email' => $user->email,
+                        'user' => $this->formatUserResponse($user),
+                    ]);
+                }
+
+                // Update data user jika perlu
+                if (!$user->avatar && $googleUser->getAvatar()) {
+                    $user->avatar = $this->storeGoogleAvatar($googleUser->getAvatar());
+                    $user->save();
+                }
+
+                // User sudah terverifikasi - buat token untuk login
+                $token = $user->createToken('google-token')->plainTextToken;
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Login dengan Google berhasil.',
+                    'access_token' => $token,
+                    'token_type' => 'Bearer',
+                    'user' => $this->formatUserResponse($user),
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Google token verification failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid Google access token.',
+                'error' => $e->getMessage()
+            ], 401);
+        }
+    }
+
+    /**
+     * STORE GOOGLE AVATAR LOCALLY
+     */
+    private function storeGoogleAvatar($avatarUrl)
+    {
+        if (!$avatarUrl)
+            return null;
+
+        try {
+            $avatarContents = file_get_contents($avatarUrl);
+            $filename = 'google_avatar_' . time() . '.jpg';
+            $path = 'avatars/' . $filename;
+
+            Storage::disk('public')->put($path, $avatarContents);
+            return $path;
+        } catch (\Exception $e) {
+            Log::error('Failed to store Google avatar: ' . $e->getMessage());
+            return null;
+        }
     }
 }

@@ -26,6 +26,7 @@ class LoginPanelProvider extends PanelProvider
             ->id('login')
             ->authGuard('web')
             ->login(Login::class)
+            ->brandName('Login')
             ->colors([
                 'primary' => Color::hex('#8B4513'), // Coklat tua (seperti coklat chocolate)
                 'secondary' => Color::hex('#D2B48C'), // Coklat tan (warna krem kecoklatan)

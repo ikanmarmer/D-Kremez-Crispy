@@ -1,11 +1,9 @@
 <?php
 
-use App\Http\Controllers\TestAPIController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\Auth\SocialiteController;
 use Illuminate\Support\Facades\Mail;
-use App\Filament\Pages\Auth\Login;
+use Laravel\Socialite\Facades\Socialite;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,8 +16,8 @@ Route::get('/', function () {
 })->name('home');
 
 
-Route::get('/{provider}/redirect', [SocialiteController::class, 'redirectToProvider']);
-Route::get('/{provider}/callback', [SocialiteController::class, 'handleProviderCallback']);
+// Route::get('/{provider}/redirect', [SocialiteController::class, 'redirectToProvider']);
+// Route::get('/{provider}/callback', [SocialiteController::class, 'handleProviderCallback']);
 
 Route::get('/tes-email', function () {
     Mail::raw('Tes kirim email dari Laravel', function($m) {
@@ -28,3 +26,14 @@ Route::get('/tes-email', function () {
 
     return 'Email berhasil dikirim';
 });
+
+Route::get('/auth/redirect', function () {
+    return Socialite::driver('google')->redirect();
+});
+
+Route::get('/auth/callback', function () {
+    $user = Socialite::driver('google')->user();
+
+    // $user->token
+});
+
