@@ -16,16 +16,16 @@ class ProdukInfolist
                 TextEntry::make('nama'),
                 TextEntry::make('harga')
                     ->numeric(),
-                TextEntry::make('stok')
-                    ->numeric(),
                 ImageEntry::make('image')
                     ->placeholder('-'),
-                TextEntry::make('dibuat_pada')
-                    ->dateTime(),
-                TextEntry::make('diperbarui_pada')
-                    ->dateTime(),
                 IconEntry::make('aktif')
                     ->boolean(),
+                TextEntry::make('created_at')
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('updated_at')
+                    ->dateTime()
+                    ->placeholder('-'),
             ]);
     }
 }

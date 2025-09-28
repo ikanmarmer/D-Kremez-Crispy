@@ -9,9 +9,9 @@ class RekapHarian extends Model
     protected $fillable = [
         'id_users',
         'tanggal',
-        'total_produk_terjual',
         'total_omzet',
-        'produk_terlaris',
+        'jumlah_pelanggan',
+        'total_pengeluaran',
         'catatan',
     ];
 
@@ -23,7 +23,7 @@ class RekapHarian extends Model
     public function produks()
     {
         return $this->belongsToMany(Produk::class, 'produk_rekap_harian')
-            ->withPivot('stok')
+            ->withPivot('jumlah_terjual')
             ->withTimestamps();
     }
 

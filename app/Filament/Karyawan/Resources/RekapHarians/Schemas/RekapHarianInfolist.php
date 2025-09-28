@@ -2,8 +2,11 @@
 
 namespace App\Filament\Karyawan\Resources\RekapHarians\Schemas;
 
+
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Hidden;
+use Illuminate\Support\Facades\Auth;
 
 class RekapHarianInfolist
 {
@@ -11,20 +14,30 @@ class RekapHarianInfolist
     {
         return $schema
             ->components([
+                Hidden::make('id_users')
+                    ->default(fn () => Auth::id()),
                 TextEntry::make('user.name')
-                    ->label('nama karyawan')
-                    ->numeric(),
+                    ->label('Karyawan')
+                    ->default(fn () => Auth::user()->name)
+                    ->disabled()
+                    ->dehydrated(false),
                 TextEntry::make('tanggal')
                     ->date(),
-                TextEntry::make('total_produk_terjual')
-                    ->numeric(),
                 TextEntry::make('total_omzet')
                     ->numeric(),
-                TextEntry::make('produk_terlaris'),
+                TextEntry::make('jumlah_pelanggan')
+                    ->numeric(),
+                TextEntry::make('total_pengeluaran')
+                    ->numeric(),
+                TextEntry::make('catatan')
+                    ->placeholder('-')
+                    ->columnSpanFull(),
                 TextEntry::make('created_at')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->placeholder('-'),
                 TextEntry::make('updated_at')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->placeholder('-'),
             ]);
     }
 }

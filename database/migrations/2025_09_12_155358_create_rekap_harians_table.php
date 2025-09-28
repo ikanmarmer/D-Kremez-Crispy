@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('rekap_harians', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_users')->constrained('users');
-            $table->date('tanggal');
-            $table->integer('total_produk_terjual')->default(0);
-            $table->decimal('total_omzet', 14, 2)->default(0);
-            $table->string('produk_terlaris')->nullable();
+            $table->date('tanggal')->unique();
+            $table->decimal('total_omzet', 12, 2);
+            $table->integer('jumlah_pelanggan');
+            $table->decimal('total_pengeluaran', 12, 2)->default(0);
             $table->text('catatan')->nullable();
             $table->timestamps();
         });

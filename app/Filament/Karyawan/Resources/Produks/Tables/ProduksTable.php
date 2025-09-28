@@ -21,19 +21,19 @@ class ProduksTable
                     ->searchable(),
                 TextColumn::make('harga')
                     ->numeric()
-                    ->sortable(),
-                TextColumn::make('stok')
-                    ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->money('idr'),
                 ImageColumn::make('image'),
-                TextColumn::make('dibuat_pada')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('diperbarui_pada')
-                    ->dateTime()
-                    ->sortable(),
                 IconColumn::make('aktif')
                     ->boolean(),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

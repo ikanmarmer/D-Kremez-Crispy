@@ -15,9 +15,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use App\Filament\Karyawan\Resources\RekapHarians\RelationManagers\ProdukRekapHarianRelationManager;
 
 class RekapHarianResource extends Resource
 {
@@ -45,7 +42,7 @@ class RekapHarianResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ProdukRekapHarianRelationManager::class,
+            RelationManagers\ProdukRekapHarianRelationManager::class,
         ];
     }
 
@@ -57,24 +54,5 @@ class RekapHarianResource extends Resource
             'view' => ViewRekapHarian::route('/{record}'),
             'edit' => EditRekapHarian::route('/{record}/edit'),
         ];
-    }
-
-    public static function mutateFormDataBeforeCreate(array $data): array
-    {
-        Log::info('mutateFormDataBeforeCreate called', ['auth_id' => Auth::id(), 'data_before' => $data]);
-
-        $data['id_users'] = Auth::id();
-        return $data;
-    }
-
-    public static function mutateFormDataBeforeSave(array $data): array
-    {
-        $data['id_users'] = Auth::id();
-        return $data;
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 3;
     }
 }
