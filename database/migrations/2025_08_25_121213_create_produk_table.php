@@ -14,6 +14,8 @@ return new class extends Migration
             $table->decimal('harga', 12, 2);
             $table->string('image')->nullable();
             $table->boolean('aktif')->default(true);
+            $table->text('deskripsi')->nullable();
+            $table->string('kategori')->nullable();
             $table->timestamps();
         });
     }

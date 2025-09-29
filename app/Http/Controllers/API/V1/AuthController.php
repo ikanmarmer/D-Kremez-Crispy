@@ -60,7 +60,6 @@ class AuthController extends Controller
             'role' => Role::User,
         ]);
 
-        // Kirim email verifikasi dengan SendGrid
         Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
 
         return response()->json([
