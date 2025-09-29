@@ -52,6 +52,41 @@ class AuthController extends Controller
     }
 
     /**
+     * CHECK REGISTRATION STATUS
+     */
+    public function checkRegistrationStatus(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'exists' => false,
+                'verified' => false,
+                'profile_completed' => false
+            ]);
+        }
+
+        return response()->json([
+            'exists' => true,
+            'verified' => (bool) $user->email_verified_at,
+            'profile_completed' => (bool) $user->profile_completed,
+            'userData' => $this->formatUserResponse($user)
+        ]);
+    }
+
+    /**
      * REGISTER - hanya email, kirim kode verifikasi.
      */
     public function register(Request $request)
@@ -63,7 +98,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validasi gagal.',
+                'message' => 'Email sudah terdaftar.',
                 'errors' => $validator->errors(),
             ], 422);
         }

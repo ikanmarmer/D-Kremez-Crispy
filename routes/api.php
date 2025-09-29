@@ -30,6 +30,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/login', 'login');
             Route::post('/verify-code', 'verifyCode');
             Route::post('/resend-verification-code', 'resendVerificationCode');
+            Route::post('/check-registration-status', 'checkRegistrationStatus'); // ✅ BARU DITAMBAHKAN
 
             // Google OAuth Routes
             Route::post('/google', 'loginWithGoogle');
