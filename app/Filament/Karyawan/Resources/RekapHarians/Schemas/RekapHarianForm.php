@@ -2,44 +2,70 @@
 
 namespace App\Filament\Karyawan\Resources\RekapHarians\Schemas;
 
+use Filament\Schemas\Schema;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class RekapHarianForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->components([
+            ->columns(2)
+            ->schema([
                 Hidden::make('id_users')
-                    ->default(fn () => Auth::id()),
-                TextInput::make('user.name')
+                    ->default(fn () => Auth::user()->id),
+
+                TextInput::make('karyawan')
                     ->label('Karyawan')
-                    ->default(fn () => Auth::user()->name)
+                    ->default(fn () => Auth::user()?->name)
                     ->disabled()
-                    ->dehydrated(false),
+                    ->dehydrated(false)
+                    ->columnSpanFull(),
+
                 DatePicker::make('tanggal')
                     ->required()
-                    ->default(fn () => now()->format('Y-m-d')),
+                    ->default(fn () => Carbon::now()->toDateString())
+                    ->native(false)
+                    ->displayFormat('d M Y'),
+
                 TextInput::make('total_omzet')
+                    ->label('Total Omzet')
                     ->required()
                     ->numeric()
-                    ->prefix('Rp'),
+                    ->minValue(0.0)
+                    ->prefix('Rp')
+                    ->placeholder('Masukkan omzet harian')
+                    ->helperText('Jumlah pemasukan kotor.'),
+
                 TextInput::make('jumlah_pelanggan')
+                    ->label('Jumlah Pelanggan')
                     ->required()
                     ->numeric()
-                    ->default(0),
+                    ->minValue(0)
+                    ->default(0)
+                    ->placeholder('Contoh: 25')
+                    ->helperText('Jumlah pelanggan yang dilayani.'),
+
                 TextInput::make('total_pengeluaran')
+                    ->label('Total Pengeluaran')
                     ->required()
                     ->numeric()
+                    ->minValue(0.0)
                     ->default(0.0)
-                    ->prefix('Rp'),
+                    ->prefix('Rp')
+                    ->placeholder('Masukkan pengeluaran harian')
+                    ->helperText('Termasuk biaya bahan, operasional, dll.'),
+
                 Textarea::make('catatan')
-                    ->columnSpanFull(),
+                    ->label('Catatan Tambahan')
+                    ->placeholder('Tuliskan keterangan atau kendala hari ini...')
+                    ->columnSpanFull()
+                    ->rows(4),
             ]);
     }
 }

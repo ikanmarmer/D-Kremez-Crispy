@@ -16,7 +16,7 @@ class Testimoni extends Model
     protected $table = 'testimoni';
 
     protected $fillable = [
-        'user_id',
+        'id_users',
         'name',
         'avatar',
         'rating',
@@ -36,7 +36,7 @@ class Testimoni extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'id_users');
     }
 
     // Relasi ke notifications
