@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\TestimoniController;
+use App\Http\Controllers\API\V1\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,18 +20,21 @@ Route::prefix('v1')->group(function () {
                 Route::post('/setup-profile', 'setupProfile');
                 Route::post('/logout', 'logout');
                 Route::get('/profile', 'profile');
-                Route::post('/upload-avatar', 'uploadAvatar');
                 Route::post('/update-profile', 'updateProfile');
                 Route::delete('/avatar', 'deleteAvatar');
                 Route::post('/change-password', 'changePassword');
             });
 
-            Route::post('/register', [AuthController::class, 'register']);
-            Route::post('/login', [AuthController::class, 'login']);
-            Route::post('/verify-code', [AuthController::class, 'verifyCode']);
-            Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
+            // Public routes
+            Route::post('/register', 'register');
+            Route::post('/login', 'login');
+            Route::post('/verify-code', 'verifyCode');
+            Route::post('/resend-verification-code', 'resendVerificationCode');
 
+            // Google OAuth Routes
+            Route::post('/google', 'loginWithGoogle');
         });
+
     Route::prefix('testimonials')
         ->controller(TestimoniController::class)
         ->group(function () {
@@ -41,7 +45,22 @@ Route::prefix('v1')->group(function () {
                 Route::post('/mark-notified', 'markAsNotified');
                 Route::get('/my-testimonial', 'getUserTestimonial');
 
+                // Tambah routes untuk approve/reject (jika diperlukan untuk admin)
+                Route::put('/{id}/approve', 'approveTestimonial');
+                Route::put('/{id}/reject', 'rejectTestimonial');
             });
+        });
+
+    // TAMBAHKAN ROUTES UNTUK NOTIFICATIONS
+    Route::prefix('notifications')
+        ->controller(NotificationController::class)
+        ->middleware('auth:sanctum')
+        ->group(function () {
+            Route::get('/', 'index');
+            Route::get('/unread-count', 'unreadCount');
+            Route::post('/{id}/read', 'markAsRead');
+            Route::post('/read-all', 'markAllAsRead');
+            Route::delete('/{id}', 'destroy');
         });
 
 });

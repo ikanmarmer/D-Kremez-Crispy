@@ -7,11 +7,14 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Illuminate\Support\HtmlString;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\MultiSelectFilter;
 use Filament\Tables\Table;
-use app\Enums\Role;
+use App\Enums\Role;
 
 class UsersTable
 {
@@ -23,12 +26,43 @@ class UsersTable
                 ImageColumn::make('avatar')
                     ->label('Avatar')
                     ->disk('public')
+                    ->height(70)
                     ->extraImgAttributes([
-                        'class' => 'w-full h-full rounded-lg object-cover shadow-md', 
-                        'alt' => 'Avatar Pengguna',
+                        'class' => 'cursor-pointer rounded-lg shadow-md w-full object-contain',
                     ])
-                    ->height(100)
-                    ->placeholder('Belum ada avatar'),
+                    ->action(
+                        Action::make('previewAvatar')
+                            ->label('Preview Avatar')
+                            ->modalHeading('Preview Avatar Pengguna')
+                            ->modalContent(function ($record) {
+                                $url = $record->avatar
+                                    ? asset('storage/' . $record->avatar)
+                                    : null;
+
+                                return new HtmlString(
+                                    $url
+                                    ? "
+                        <div class='flex flex-col items-center space-y-4'>
+                            <img
+                                src='{$url}'
+                                alt='{$record->name} Avatar'
+                                class='max-h-[80vh] w-auto rounded-xl shadow-lg object-contain cursor-zoom-in'
+                                onclick='this.classList.toggle(\"scale-150\")'
+                            >
+                        </div>
+                    "
+                                    : "
+                        <div class='text-gray-400'>
+                            Belum ada avatar.
+                        </div>
+                    "
+                                );
+                            })
+                            ->modalWidth('7xl')
+                            ->closeModalByClickingAway()
+                            ->modalSubmitAction(false)
+                            ->modalCancelAction(false)
+                    ),
 
                 // Nama lengkap
                 TextColumn::make('name')
@@ -41,8 +75,7 @@ class UsersTable
                     ->label('Email')
                     ->searchable()
                     ->copyable()
-                    ->limit(30)
-                    ->tooltip(fn($state) => $state),
+                    ->limit(30),
 
                 // Role
                 TextColumn::make('role')
@@ -78,7 +111,6 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                // Filter berdasarkan Role
                 MultiSelectFilter::make('role')
                     ->label('Filter Peran')
                     ->options([
@@ -88,15 +120,38 @@ class UsersTable
                     ]),
             ])
             ->recordActions([
-                ViewAction::make()->label('Lihat'),
-                EditAction::make()->label('Edit'),
-                DeleteAction::make()->label('Hapus'),
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->label('Lihat'),
+
+                    EditAction::make()
+                        ->label('Edit')
+                        ->hidden(fn($record) => $record->role === Role::User),
+
+                    DeleteAction::make()
+                        ->label('Hapus')
+                        ->hidden(fn($record) => $record->role === Role::User)
+                        ->requiresConfirmation()
+                        ->modalHeading('Hapus Pengguna')
+                        ->modalSubheading('Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.'),
+                ])
+                    ->color('gray')
+                    ->hidden(fn($record) => $record->role === Role::User), // sembunyikan grup untuk User
+                ViewAction::make()->label('Lihat')->visible(fn($record) => $record->role === Role::User), // User tetap bisa lihat
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Hapus')
+                        ->requiresConfirmation()
+                        ->modalHeading('Hapus Pengguna')
+                        ->modalSubheading('Apakah Anda yakin ingin menghapus pengguna yang dipilih? Tindakan ini tidak dapat dibatalkan.'),
                 ]),
             ])
-            ->selectCurrentPageOnly();
+            ->selectCurrentPageOnly()
+            ->checkIfRecordIsSelectableUsing(
+                fn($record) => $record->role !== Role::User
+            );
+
     }
 }

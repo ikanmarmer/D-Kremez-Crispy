@@ -78,7 +78,8 @@ class TestimonisTable
                             ->title('Testimoni disetujui')
                             ->success()
                             ->send();
-                    }),
+                    })
+                    ->hidden(fn(Testimoni $record): bool => $record->status !== 'Menunggu'),
                 Action::make('reject')
                     ->label('Tolak')
                     ->icon('heroicon-o-x-circle')
@@ -96,15 +97,16 @@ class TestimonisTable
                             ->title('Testimoni ditolak')
                             ->danger()
                             ->send();
-                    }),
+                    })
+                    ->hidden(fn(Testimoni $record): bool => $record->status !== 'Menunggu'),
 
                 DeleteAction::make()
-                    ->visible(fn(Testimoni $record): bool => $record->status === Status::Ditolak),
+                    ->visible(fn(Testimoni $record): bool => $record->status === 'Ditolak'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->visible(fn(Collection $records): bool => $records->every(fn(Testimoni $record): bool => $record->status === Status::Ditolak)),
+                        ->visible(fn(Collection $records): bool => $records->every(fn(Testimoni $record): bool => $record->status === 'Ditolak')),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')

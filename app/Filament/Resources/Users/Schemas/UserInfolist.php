@@ -4,15 +4,19 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\Role;
 use App\Enums\Status;
+use App\Models\Testimoni;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\FontWeight;
+use Filament\Notifications\Notification;
 use Filament\Actions\Action;
+use Illuminate\Support\HtmlString;
 
 class UserInfolist
 {
@@ -29,7 +33,7 @@ class UserInfolist
                 ])
                 ->schema([
                     Flex::make([
-                        // Sub-section: Avatar
+                        // Sub-section: Avatar  
                         Section::make([
                             ImageEntry::make('avatar')
                                 ->label('')
@@ -38,8 +42,29 @@ class UserInfolist
                                 ->circular()
                                 ->size(120)
                                 ->extraImgAttributes([
-                                    'class' => 'ring-4 ring-white dark:ring-gray-800 shadow-xl',
-                                ]),
+                                    'class' => 'ring-4 ring-white dark:ring-gray-800 shadow-xl cursor-pointer',
+                                    'onclick' => "window.dispatchEvent(new CustomEvent('open-avatar-preview', { detail: { src: this.src } }))",
+                                ])
+                                ->action(
+                                    Action::make('previewAvatar')
+                                        ->label('Preview')
+                                        ->icon('heroicon-o-magnifying-glass-plus')
+                                        ->modalHeading('Preview Avatar')
+                                        ->modalWidth('7xl')
+                                        ->modalSubmitAction(false)
+                                        ->modalCancelAction(false)
+                                        ->closeModalByClickingAway()
+                                        ->modalContent(fn($record) => new HtmlString(
+                                            $record->avatar
+                                            ? "<div class='flex justify-center'>
+                          <img src='" . asset('storage/' . $record->avatar) . "'
+                               alt='Avatar'
+                               class='max-h-[80vh] w-auto rounded-xl shadow-lg object-contain cursor-zoom-in'
+                               onclick='this.classList.toggle(\"scale-150\")'>
+                       </div>"
+                                            : "<div class='text-gray-400'>Belum ada avatar</div>"
+                                        ))
+                                )
                         ])
                             ->extraAttributes(['class' => 'flex justify-center items-center'])
                             ->grow(false),
@@ -60,7 +85,7 @@ class UserInfolist
                                 ->copyable()
                                 ->copyMessage('Email disalin!')
                                 ->extraAttributes([
-                                    'class' => 'text-base text-gray-600 dark:text-gray-300 mb-3'
+                                    'class' => 'text-sm font-medium text-gray-700 dark:text-gray-200',
                                 ]),
 
                             TextEntry::make('role')
@@ -87,8 +112,6 @@ class UserInfolist
                     ])
                         ->from('md'),
                 ]),
-
-            // --- //
 
             // SECTION: Riwayat Waktu
             Section::make('Riwayat Waktu')
@@ -121,55 +144,68 @@ class UserInfolist
                         ->columnSpan(1),
                 ]),
 
-            // --- //
-
-            // SECTION: Foto Testimoni
-            Section::make('Foto Testimoni')
-                ->icon('heroicon-o-photo') // ✅ Icon added
+            // Section: Foto Produk. Menggunakan ->hidden()
+            Section::make('Foto Produk')
+                ->icon('heroicon-o-photo')
+                ->hidden(fn($record) => $record->testimonial === null)
                 ->schema([
                     ImageEntry::make('testimonial.product_photo')
-                        ->label('Foto Testimoni')
                         ->disk('public')
+                        ->label('Foto Produk')
                         ->placeholder('Tidak ada foto produk')
                         ->height(300)
                         ->extraImgAttributes([
-                            'class' => 'w-full h-full max-w-md mx-auto rounded-lg object-cover shadow-md',
-                            'alt' => 'Foto Produk',
+                            'class' => 'w-full h-full max-w-md mx-auto rounded-lg object-cover shadow-md cursor-pointer',
+                            'onclick' => "window.dispatchEvent(new CustomEvent('open-product-preview', { detail: { src: this.src } }))",
                         ])
+                        ->action(
+                            Action::make('previewProduct')
+                                ->label('Preview')
+                                ->icon('heroicon-o-magnifying-glass-plus')
+                                ->modalHeading('Preview Foto Produk')
+                                ->modalWidth('7xl')
+                                ->modalSubmitAction(false)
+                                ->modalCancelAction(false)
+                                ->closeModalByClickingAway()
+                                ->modalContent(fn($record) => new HtmlString(
+                                    $record->product_photo
+                                    ? "<div class='flex justify-center'>
+                          <img src='" . asset('storage/' . $record->product_photo) . "'
+                               alt='Foto Produk'
+                               class='max-h-[80vh] w-auto rounded-xl shadow-lg object-contain cursor-zoom-in'
+                               onclick='this.classList.toggle(\"scale-150\")'>
+                       </div>"
+                                    : "<div class='text-gray-400'>Tidak ada foto produk</div>"
+                                ))
+                        )
                         ->columnSpanFull(),
-                ])
-                ->visible(fn($record) => $record->testimonial()->exists()), // ✅ Tambahkan kondisi visibilitas
+                ]),
 
-            // SECTION: Isi Testimoni
-            Section::make('Isi Testimoni')
-                ->icon('heroicon-o-chat-bubble-bottom-center-text') // ✅ Icon added
-                ->schema([
-                    TextEntry::make('testimonial.content')
-                        ->label('Testimoni')
-                        ->markdown()
-                        ->prose()
-                        ->columnSpanFull(),
-                ])
-                ->visible(fn($record) => $record->testimonial()->exists()), // ✅ Tambahkan kondisi visibilitas
-
-            // SECTION: Detail Testimoni
+            // Section: Testimoni. Menggunakan ->hidden() untuk menyembunyikan jika tidak ada testimoni.
             Section::make('Detail Testimoni')
-                ->icon('heroicon-o-clipboard-document-list') // ✅ Icon added
+                ->icon('heroicon-o-clipboard-document-list')
+                ->description('Status dan informasi teknis testimoni')
                 ->schema([
                     Grid::make()
                         ->schema([
                             TextEntry::make('testimonial.status')
                                 ->label('Status')
                                 ->badge()
-                                ->color(fn(string $state): string => match ($state) {
-                                    Status::Menunggu->value => 'warning',
-                                    Status::Disetujui->value => 'success',
-                                    Status::Ditolak->value => 'danger',
-                                })
-                                ->icon(fn(string $state): string => match ($state) { // ✅ Icons based on status
+                                ->icon(fn($state): string => match (
+                                $state instanceof Status ? $state->value : (string) $state
+                            ) {
                                     Status::Menunggu->value => 'heroicon-m-clock',
                                     Status::Disetujui->value => 'heroicon-m-check-circle',
                                     Status::Ditolak->value => 'heroicon-m-x-circle',
+                                    default => 'heroicon-m-question-mark-circle',
+                                })
+                                ->color(fn($state): string => match (
+                                $state instanceof Status ? $state->value : (string) $state
+                            ) {
+                                    Status::Menunggu->value => 'warning',
+                                    Status::Disetujui->value => 'success',
+                                    Status::Ditolak->value => 'danger',
+                                    default => 'secondary',
                                 }),
 
                             TextEntry::make('testimonial.rating')
@@ -188,29 +224,48 @@ class UserInfolist
                                     default => 'heroicon-o-star',
                                 }),
 
+                            IconEntry::make('testimonial.is_notified')
+                                ->label('Sudah Dilihat Pengguna?')
+                                ->boolean(),
+
                             TextEntry::make('testimonial.created_at')
                                 ->label('Tanggal Dibuat')
                                 ->dateTime()
-                                ->icon('heroicon-o-calendar-days') // ✅ Icon added
+                                ->icon('heroicon-m-plus-circle')
                                 ->placeholder('-'),
 
                             TextEntry::make('testimonial.updated_at')
                                 ->label('Tanggal Diperbarui')
                                 ->dateTime()
-                                ->icon('heroicon-o-calendar-days') // ✅ Icon added
+                                ->icon('heroicon-m-pencil-square')
                                 ->placeholder('-'),
                         ])
                         ->columns([
-                            'default' => 2,
-                            'md' => 3,
+                            'default' => 1,
+                            'md' => 2,
                             'lg' => 3,
-                        ]),
+                        ])
                 ])
-                ->visible(fn($record) => $record->testimonial()->exists()), // ✅ Tambahkan kondisi visibilitas
+                ->visible(
+                    fn($record) =>
+                    $record->testimonial?->status === 'Menunggu'
+                ),
+            // Section: Menggunakan ->hidden()
+            Section::make('Isi Testimoni')
+                ->icon('heroicon-o-chat-bubble-bottom-center-text')
+                ->collapsible() // 🔽 isi bisa dilipat
+                ->hidden(fn($record) => $record->testimonial === null)
+                ->schema([
+                    TextEntry::make('testimonial.content')
+                        ->label('Testimoni')
+                        ->markdown()
+                        ->prose()
+                        ->columnSpanFull(),
+                ]),
 
 
-            // SECTION: Aksi (Approve / Reject)
-            Section::make('Aksi Moderasi')
+            // Section: Moderasi. Menggunakan ->hidden()
+            Section::make('Moderasi')
                 ->icon('heroicon-o-adjustments-horizontal')
                 ->description('Pilih tindakan untuk testimoni ini.')
                 ->schema([
@@ -220,25 +275,39 @@ class UserInfolist
                             ->color('success')
                             ->icon('heroicon-m-check-circle')
                             ->requiresConfirmation()
-                            ->action(fn($record) => $record->update([
-                                'status' => Status::Disetujui,
-                            ])),
+                            ->action(function ($record) {
+                                $record->testimonial?->update([
+                                    'status' => Status::Disetujui,
+                                ]);
 
+                                Notification::make()
+                                    ->title('Testimoni berhasil disetujui.')
+                                    ->success()
+                                    ->send();
+                            }),
 
                         Action::make('reject')
                             ->label('Tolak')
                             ->color('danger')
                             ->icon('heroicon-m-x-circle')
                             ->requiresConfirmation()
-                            ->action(fn($record) => $record->update([
-                                'status' => Status::Ditolak,
-                            ])),
+                            ->action(function ($record) {
+                                $record->testimonial?->update([
+                                    'status' => Status::Ditolak,
+                                ]);
 
-                    ])->gap(3), // ✅ jarak antar tombol
+                                Notification::make()
+                                    ->title('Testimoni berhasil ditolak.')
+                                    ->danger()
+                                    ->send();
+                            }),
+                    ])->gap(3), // jarak antar tombol
                 ])
                 ->columns(2)
-                ->hidden(fn($record) => in_array($record->status, [Status::Disetujui, Status::Ditolak])),
+                ->visible(
+                    fn($record) =>
+                    $record->testimonial?->status === 'Menunggu'
+                ),
         ]);
-
     }
 }

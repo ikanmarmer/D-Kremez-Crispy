@@ -26,7 +26,6 @@ class TestimoniResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Testimoni';
 
-
     public static function form(Schema $schema): Schema
     {
         return TestimoniForm::configure($schema);

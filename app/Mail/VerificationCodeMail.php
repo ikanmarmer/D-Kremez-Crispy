@@ -3,24 +3,59 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class VerificationCodeMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $code;
+    public $verificationCode;
+    public $customDomain;
 
-    public function __construct($code)
+    /**
+     * Create a new message instance.
+     */
+    public function __construct($verificationCode)
     {
-        $this->code = $code;
+        $this->verificationCode = $verificationCode;
+        $this->customDomain = config('app.name', 'Your Custom Domain');
     }
 
-    public function build()
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
     {
-        return $this->subject('Kode Verifikasi Akun Anda')
-                    ->view('emails.verification-code')
-                    ->with(['code' => $this->code]);
+        return new Envelope(
+            subject: 'Kode Verifikasi - ' . $this->customDomain,
+        );
+    }
+
+    /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.verification-code',
+            with: [
+                'verificationCode' => $this->verificationCode,
+                'customDomain' => $this->customDomain,
+            ],
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
     }
 }

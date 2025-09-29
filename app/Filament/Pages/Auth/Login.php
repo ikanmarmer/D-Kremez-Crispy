@@ -11,14 +11,14 @@ class Login extends BaseLogin
     {
         $user = auth()->user();
 
-        if ($user && $user->role === Role::Admin) {
-            return '/admin';
+        if ($user && $user->role === Role::Admin->value) {
+            return filament()->getPanel('admin')->getUrl();
         }
 
-        if ($user && $user->role === Role::Karyawan) {
-            return '/karyawan';
+        if ($user && $user->role === Role::Karyawan->value) {
+            return filament()->getPanel('karyawan')->getUrl();
         }
 
-        return '/';
+        return filament()->getPanel('login')->getUrl(); // fallback
     }
 }
