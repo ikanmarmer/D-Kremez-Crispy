@@ -25,6 +25,7 @@ class User extends Authenticatable implements FilamentUser
         'role',
         'avatar',
         'profile_completed',
+        'google_id',
     ];
 
     protected $hidden = [
@@ -83,11 +84,11 @@ class User extends Authenticatable implements FilamentUser
     //     // 2. Otorisasi untuk Panel Karyawan (misalnya, dengan ID 'karyawan')
     //     if ($panel->getId() === 'karyawan') {
     //         // Kita izinkan akses jika user adalah Karyawan.
-    //         return $this->hasRole('Karyawan'); 
+    //         return $this->hasRole('Karyawan');
     //     }
 
     //     // Izinkan akses ke panel lain jika tidak ada batasan spesifik.
-    //     return true; 
+    //     return true;
     // }
 
     /**
