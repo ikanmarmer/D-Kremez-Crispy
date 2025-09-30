@@ -382,7 +382,103 @@ class AuthController extends Controller
     }
 
     /**
-     * GOOGLE AUTH - dengan verifikasi email
+     * ====================================================
+     * GOOGLE OAUTH IMPLEMENTATION - DIPERBAIKI
+     * ====================================================
+     */
+
+    /**
+     * Redirect to Google OAuth
+     */
+    public function redirectToGoogle()
+    {
+        try {
+            return Socialite::driver('google')
+                ->stateless()
+                ->redirect();
+        } catch (\Exception $e) {
+            Log::error('Google redirect failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Google OAuth redirect failed.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Handle Google OAuth callback - DIPERBAIKI (tanpa google_id)
+     */
+    public function handleGoogleCallback(Request $request)
+    {
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+
+            // Cari user berdasarkan email Google
+            $user = User::where('email', $googleUser->getEmail())->first();
+
+            if (!$user) {
+                // Buat user baru untuk Google login tanpa google_id
+                $userData = [
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'password' => Hash::make(Str::random(16)),
+                    'avatar' => $this->storeGoogleAvatar($googleUser->getAvatar()),
+                    'email_verified_at' => now(), // Google email sudah terverifikasi
+                    'profile_completed' => true,
+                    'role' => Role::User,
+                ];
+
+                // Cek apakah kolom google_id ada di tabel
+                if (\Schema::hasColumn('users', 'google_id')) {
+                    $userData['google_id'] = $googleUser->getId();
+                }
+
+                $user = User::create($userData);
+            } else {
+                // Update user yang sudah ada
+                $updateData = [];
+
+                // Cek dan update google_id jika kolom ada
+                if (\Schema::hasColumn('users', 'google_id') && !$user->google_id) {
+                    $updateData['google_id'] = $googleUser->getId();
+                }
+
+                if (!$user->avatar && $googleUser->getAvatar()) {
+                    $updateData['avatar'] = $this->storeGoogleAvatar($googleUser->getAvatar());
+                }
+
+                if (!$user->email_verified_at) {
+                    $updateData['email_verified_at'] = now();
+                }
+
+                // Pastikan profile_completed true untuk user Google
+                if (!$user->profile_completed) {
+                    $updateData['profile_completed'] = true;
+                }
+
+                if (!empty($updateData)) {
+                    $user->update($updateData);
+                }
+            }
+
+            // Buat token untuk user
+            $token = $user->createToken('google-auth-token')->plainTextToken;
+
+            // Redirect ke frontend dengan token
+            $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
+            $userData = $this->formatUserResponse($user);
+
+            return redirect("{$frontendUrl}/auth/google/callback?token={$token}&user=" . urlencode(json_encode($userData)));
+
+        } catch (\Exception $e) {
+            Log::error('Google callback failed: ' . $e->getMessage());
+            $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
+            return redirect("{$frontendUrl}/auth/google/callback?error=1&message=" . urlencode($e->getMessage()));
+        }
+    }
+
+    /**
+     * Alternative: Direct Google login with access token (tanpa google_id)
      */
     public function loginWithGoogle(Request $request)
     {
@@ -399,74 +495,58 @@ class AuthController extends Controller
         }
 
         try {
-            // Verify Google access token
             $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->access_token);
 
-            // Cari user berdasarkan email
             $user = User::where('email', $googleUser->getEmail())->first();
 
             if (!$user) {
-                // Buat user baru dengan kode verifikasi
-                $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-
-                $user = User::create([
+                $userData = [
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'password' => Hash::make(Str::random(16)),
                     'avatar' => $this->storeGoogleAvatar($googleUser->getAvatar()),
-                    'email_verification_code' => $verificationCode,
-                    'email_verified_at' => null,
+                    'email_verified_at' => now(),
                     'profile_completed' => true,
                     'role' => Role::User,
-                ]);
+                ];
 
-                // Kirim email verifikasi
-                Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
+                // Cek apakah kolom google_id ada di tabel
+                if (\Schema::hasColumn('users', 'google_id')) {
+                    $userData['google_id'] = $googleUser->getId();
+                }
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Registrasi dengan Google berhasil! Silakan cek email untuk kode verifikasi.',
-                    'requires_verification' => true,
-                    'email' => $user->email,
-                    'user' => $this->formatUserResponse($user),
-                ]);
-
+                $user = User::create($userData);
             } else {
-                // User sudah ada - cek status verifikasi
-                if (!$user->email_verified_at) {
-                    // Jika email belum terverifikasi, kirim ulang kode
-                    $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-                    $user->email_verification_code = $verificationCode;
-                    $user->save();
+                $updateData = [];
 
-                    Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
-
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Email belum terverifikasi. Kode verifikasi baru telah dikirim.',
-                        'requires_verification' => true,
-                        'email' => $user->email,
-                        'user' => $this->formatUserResponse($user),
-                    ]);
+                // Cek dan update google_id jika kolom ada
+                if (\Schema::hasColumn('users', 'google_id') && !$user->google_id) {
+                    $updateData['google_id'] = $googleUser->getId();
                 }
 
-                // Update data user jika perlu
                 if (!$user->avatar && $googleUser->getAvatar()) {
-                    $user->avatar = $this->storeGoogleAvatar($googleUser->getAvatar());
-                    $user->save();
+                    $updateData['avatar'] = $this->storeGoogleAvatar($googleUser->getAvatar());
                 }
 
-                // User sudah terverifikasi - buat token untuk login
-                $token = $user->createToken('google-token')->plainTextToken;
+                // Pastikan profile_completed true untuk user Google
+                if (!$user->profile_completed) {
+                    $updateData['profile_completed'] = true;
+                }
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Login dengan Google berhasil.',
-                    'access_token' => $token,
-                    'token_type' => 'Bearer',
-                    'user' => $this->formatUserResponse($user),
-                ]);
+                if (!empty($updateData)) {
+                    $user->update($updateData);
+                }
             }
+
+            $token = $user->createToken('google-token')->plainTextToken;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Login dengan Google berhasil.',
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => $this->formatUserResponse($user),
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Google token verification failed: ' . $e->getMessage());
@@ -483,12 +563,11 @@ class AuthController extends Controller
      */
     private function storeGoogleAvatar($avatarUrl)
     {
-        if (!$avatarUrl)
-            return null;
+        if (!$avatarUrl) return null;
 
         try {
             $avatarContents = file_get_contents($avatarUrl);
-            $filename = 'google_avatar_' . time() . '.jpg';
+            $filename = 'google_avatar_' . time() . '_' . Str::random(10) . '.jpg';
             $path = 'avatars/' . $filename;
 
             Storage::disk('public')->put($path, $avatarContents);

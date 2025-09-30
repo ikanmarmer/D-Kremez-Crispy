@@ -6,17 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class StokMentah extends Model
 {
-    protected $table = 'stok_mentah';
+    protected $table = 'stok_mentahs';
 
     public $timestamps = false;
 
     protected $fillable = [
+        'tanggal',
         'nama',
         'harga',
-        'stok_awal',
-        'stok_masuk',
-        'stok_keluar',
-        'stok_akhir',
+        'jumlah',
         'harga_total_stok',
     ];
 

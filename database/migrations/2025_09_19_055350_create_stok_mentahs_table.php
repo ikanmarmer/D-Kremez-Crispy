@@ -13,12 +13,10 @@ return new class extends Migration
     {
         Schema::create('stok_mentahs', function (Blueprint $table) {
             $table->id();
+            $table->date('tanggal')->unique();
             $table->string('nama');
             $table->integer('harga')->default(0);
-            $table->integer('stok_awal')->default(0);
-            $table->integer('stok_masuk')->default(0);
-            $table->integer('stok_keluar')->default(0);
-            $table->integer('stok_akhir')->default(0);
+            $table->integer('jumlah')->default(0);
             $table->integer('harga_total_stok')->default(0);
             $table->timestamps();
         });

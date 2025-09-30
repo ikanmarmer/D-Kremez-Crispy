@@ -54,7 +54,6 @@ class SocialiteController extends Controller
             Auth::login($user);
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            // Arahkan ke setup profile
             return redirect()->to("{$frontendUrl}/setup-profile?token={$token}");
 
         } catch (\Throwable $e) {
