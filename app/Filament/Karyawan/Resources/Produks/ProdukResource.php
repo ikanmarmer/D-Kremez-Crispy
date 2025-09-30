@@ -22,7 +22,7 @@ class ProdukResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'produk';
+    protected static ?string $recordTitleAttribute = 'Menu';
 
     public static function form(Schema $schema): Schema
     {
