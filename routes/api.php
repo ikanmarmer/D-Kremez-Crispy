@@ -30,10 +30,12 @@ Route::prefix('v1')->group(function () {
             Route::post('/login', 'login');
             Route::post('/verify-code', 'verifyCode');
             Route::post('/resend-verification-code', 'resendVerificationCode');
-            Route::post('/check-registration-status', 'checkRegistrationStatus'); // ✅ BARU DITAMBAHKAN
+            Route::post('/check-registration-status', 'checkRegistrationStatus');
 
-            // Google OAuth Routes
-            Route::post('/google', 'loginWithGoogle');
+            // Google OAuth Routes - TAMBAHKAN INI
+            Route::get('/google', 'redirectToGoogle');
+            Route::get('/google/callback', 'handleGoogleCallback');
+            Route::post('/google/login', 'loginWithGoogle');
         });
 
     Route::prefix('testimonials')
