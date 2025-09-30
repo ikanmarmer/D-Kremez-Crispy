@@ -446,12 +446,12 @@ class AuthController extends Controller
             $token = $user->createToken('google-auth-token')->plainTextToken;
 
             // Redirect ke frontend dengan token - DIPERBAIKI URL
-            $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
+            $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
             return redirect("{$frontendUrl}/auth/google/callback?token={$token}&user=" . urlencode(json_encode($this->formatUserResponse($user))));
 
         } catch (\Exception $e) {
             Log::error('Google callback failed: ' . $e->getMessage());
-            $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
+            $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
             return redirect("{$frontendUrl}/auth/google/callback?error=1");
         }
     }
