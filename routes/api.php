@@ -42,14 +42,17 @@ Route::prefix('v1')->group(function () {
     Route::prefix('testimonials')
         ->controller(TestimoniController::class)
         ->group(function () {
-            Route::get('/', 'getApprovedTestimonials');
+            // Public routes - bisa diakses tanpa login
+            Route::get('/approved', 'getApprovedTestimonials');
+
+            // Protected routes - butuh authentication
             Route::middleware('auth:sanctum')->group(function () {
                 Route::post('/', 'submitTestimonial');
-                Route::get('/check', 'hasSubmittedTestimonial');
+                Route::get('/check', 'checkTestimonialStatus'); // DIUBAH: dari hasSubmittedTestimonial menjadi checkTestimonialStatus
                 Route::post('/mark-notified', 'markAsNotified');
-                Route::get('/my-testimonial', 'getUserTestimonial');
+                Route::get('/user', 'getUserTestimonial'); // DIUBAH: dari my-testimonial menjadi user
 
-                // Tambah routes untuk approve/reject (jika diperlukan untuk admin)
+                // Routes untuk admin (jika diperlukan)
                 Route::put('/{id}/approve', 'approveTestimonial');
                 Route::put('/{id}/reject', 'rejectTestimonial');
             });

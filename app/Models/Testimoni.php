@@ -16,7 +16,7 @@ class Testimoni extends Model
     protected $table = 'testimoni';
 
     protected $fillable = [
-        'id_users',
+        'user_id', // DIUBAH: dari id_users menjadi user_id
         'name',
         'avatar',
         'rating',
@@ -36,7 +36,11 @@ class Testimoni extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'id_users');
+        // DIUBAH: foreign key dari id_users menjadi user_id
+        return $this->belongsTo(User::class, 'user_id')->withDefault([
+            'name' => 'User Tidak Ditemukan',
+            'avatar' => null
+        ]);
     }
 
     // Relasi ke notifications

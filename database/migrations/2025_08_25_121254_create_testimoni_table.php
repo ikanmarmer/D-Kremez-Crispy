@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('testimoni', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_users')->constrained('users');
+            $table->foreignId('user_id')->constrained('users');
             $table->string('name');
             $table->string('avatar')->nullable();
             $table->decimal('rating', 2, 1)->unsigned();
