@@ -124,7 +124,7 @@ class AuthController extends Controller
     }
 
     /**
-     * VERIFY EMAIL CODE
+     * VERIFY EMAIL CODE - PERBAIKAN: Jangan generate token setelah verifikasi
      */
     public function verifyCode(Request $request)
     {
@@ -154,14 +154,10 @@ class AuthController extends Controller
         $user->email_verification_code = null;
         $user->save();
 
-        // Buat token HANYA setelah verifikasi berhasil
-        $token = $user->createToken('auth_token')->plainTextToken;
-
+        // PERBAIKAN: Hanya return success tanpa generate token
         return response()->json([
             'success' => true,
             'message' => 'Email berhasil diverifikasi.',
-            'access_token' => $token,
-            'token_type' => 'Bearer',
             'requires_setup' => !$user->profile_completed,
             'user' => $this->formatUserResponse($user),
         ]);
@@ -266,23 +262,47 @@ class AuthController extends Controller
     }
 
     /**
-     * SETUP PROFILE
+     * SETUP PROFILE - PERBAIKAN: Public endpoint tanpa authentication, gunakan email untuk identifikasi
      */
     public function setupProfile(Request $request)
     {
-        $user = $request->user();
-
-        if ($user->profile_completed) {
-            return response()->json(['success' => false, 'message' => 'Profil sudah pernah dilengkapi.'], 400);
-        }
-
         $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
             'name' => 'required|string|max:255',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => 'Validasi gagal.', 'errors' => $validator->errors()], 422);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Cari user berdasarkan email (bukan dari auth)
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User tidak ditemukan.'
+            ], 404);
+        }
+
+        if ($user->profile_completed) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profil sudah pernah dilengkapi.'
+            ], 400);
+        }
+
+        // Pastikan email sudah terverifikasi
+        if (!$user->email_verified_at) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email belum terverifikasi.'
+            ], 403);
         }
 
         $user->name = $request->name;
@@ -290,9 +310,10 @@ class AuthController extends Controller
         $user->profile_completed = true;
         $user->save();
 
+        // PERBAIKAN: Tidak generate token, hanya return success message
         return response()->json([
             'success' => true,
-            'message' => 'Profil berhasil dilengkapi.',
+            'message' => 'Profil berhasil dilengkapi. Silakan login dengan email dan password Anda.',
             'user' => $this->formatUserResponse($user),
         ]);
     }

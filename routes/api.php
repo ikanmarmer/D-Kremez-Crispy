@@ -16,26 +16,27 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')
         ->controller(AuthController::class)
         ->group(function () {
+            // Public routes - TANPA AUTHENTICATION
+            Route::post('/register', 'register');
+            Route::post('/login', 'login');
+            Route::post('/verify-code', 'verifyCode');
+            Route::post('/resend-verification-code', 'resendVerificationCode');
+            Route::post('/check-registration-status', 'checkRegistrationStatus');
+            Route::post('/setup-profile', 'setupProfile'); // PERBAIKAN: PINDAHKAN KE LUAR MIDDLEWARE
+
+            // Google OAuth Routes
+            Route::get('/google', 'redirectToGoogle');
+            Route::get('/google/callback', 'handleGoogleCallback');
+            Route::post('/google/login', 'loginWithGoogle');
+
+            // Protected routes - DENGAN AUTHENTICATION
             Route::middleware('auth:sanctum')->group(function () {
-                Route::post('/setup-profile', 'setupProfile');
                 Route::post('/logout', 'logout');
                 Route::get('/profile', 'profile');
                 Route::post('/update-profile', 'updateProfile');
                 Route::delete('/avatar', 'deleteAvatar');
                 Route::post('/change-password', 'changePassword');
             });
-
-            // Public routes
-            Route::post('/register', 'register');
-            Route::post('/login', 'login');
-            Route::post('/verify-code', 'verifyCode');
-            Route::post('/resend-verification-code', 'resendVerificationCode');
-            Route::post('/check-registration-status', 'checkRegistrationStatus');
-
-            // Google OAuth Routes - TAMBAHKAN INI
-            Route::get('/google', 'redirectToGoogle');
-            Route::get('/google/callback', 'handleGoogleCallback');
-            Route::post('/google/login', 'loginWithGoogle');
         });
 
     Route::prefix('testimonials')
