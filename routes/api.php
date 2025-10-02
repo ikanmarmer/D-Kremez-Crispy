@@ -3,7 +3,6 @@
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\TestimoniController;
 use App\Http\Controllers\API\V1\NotificationController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -69,5 +68,4 @@ Route::prefix('v1')->group(function () {
             Route::post('/read-all', 'markAllAsRead');
             Route::delete('/{id}', 'destroy');
         });
-
 });

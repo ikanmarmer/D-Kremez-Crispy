@@ -1,26 +1,36 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\SocialiteController;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
+use App\Enums\Role;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
-// Route::get('/', Login::class)->name('home');
+
+// Route utama dengan pengecekan autentikasi
 Route::get('/', function () {
-    return redirect()->to(url('/login'));
+    if (auth()->check()) {
+        $user = auth()->user();
+
+        // Redirect berdasarkan role user yang sudah login
+        return match ($user->role) {
+            Role::Admin => redirect()->to('/admin'),
+            Role::Karyawan => redirect()->to('/karyawan'),
+            default => redirect()->to('/login'),
+        };
+    }
+
+    // Jika belum login, redirect ke halaman login
+    return redirect()->to('/login');
 })->name('home');
 
 
-// Route::get('/{provider}/redirect', [SocialiteController::class, 'redirectToProvider']);
-// Route::get('/{provider}/callback', [SocialiteController::class, 'handleProviderCallback']);
-
 Route::get('/tes-email', function () {
-    Mail::raw('Tes kirim email dari Laravel', function($m) {
+    Mail::raw('Tes kirim email dari Laravel', function ($m) {
         $m->to('muhamadkeiza.ddd@gmail.com')->subject('Tes Email');
     });
 
@@ -36,5 +46,3 @@ Route::get('/auth/callback', function () {
 
     // $user->token
 });
-
-//tess

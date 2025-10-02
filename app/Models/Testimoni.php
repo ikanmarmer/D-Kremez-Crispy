@@ -24,7 +24,6 @@ class Testimoni extends Model
         'product_photo',
         'status',
         'is_notified',
-        'admin_feedback'
     ];
 
     protected $casts = [
