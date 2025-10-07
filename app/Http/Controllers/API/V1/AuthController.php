@@ -32,7 +32,7 @@ class AuthController extends Controller
             [
                 'avatar' => $user->avatar,
                 'avatar_url' => $avatarUrl,
-            ]
+            ]   
         );
     }
 

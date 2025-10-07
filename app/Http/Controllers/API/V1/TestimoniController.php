@@ -15,26 +15,27 @@ use Illuminate\Support\Str;
 class TestimoniController extends Controller
 {
     private function formatTestimonial(Testimoni $testimoni): array
-    {
-        $avatarUrl = $testimoni->avatar ? URL::to(Storage::url($testimoni->avatar)) : null;
-        $productPhotoUrl = $testimoni->product_photo ? URL::to(Storage::url($testimoni->product_photo)) : null;
+{
+    // ⚠️ PERBAIKAN: Selalu ambil avatar terbaru dari user, bukan dari testimoni
+    $avatarUrl = $testimoni->user->avatar ? URL::to(Storage::url($testimoni->user->avatar)) : null;
+    $productPhotoUrl = $testimoni->product_photo ? URL::to(Storage::url($testimoni->product_photo)) : null;
 
-        return [
-            'id' => $testimoni->id,
-            'rating' => (float) $testimoni->rating,
-            'content' => $testimoni->content,
-            'status' => $testimoni->status,
-            'created_at' => $testimoni->created_at?->toISOString(),
-            'updated_at' => $testimoni->updated_at?->toISOString(),
-            'user' => [
-                'name' => $testimoni->name,
-                'role' => $testimoni->user->role ?? 'user',
-                'avatar_url' => $avatarUrl,
-            ],
-            'product_photo_url' => $productPhotoUrl,
-            // DIHAPUS: 'admin_feedback' => $testimoni->admin_feedback,
-        ];
-    }
+    return [
+        'id' => $testimoni->id,
+        'rating' => (float) $testimoni->rating,
+        'content' => $testimoni->content,
+        'status' => $testimoni->status,
+        'created_at' => $testimoni->created_at?->toISOString(),
+        'updated_at' => $testimoni->updated_at?->toISOString(),
+        'user' => [
+            'id' => $testimoni->user->id, // Pastikan ID user ada
+            'name' => $testimoni->user->name, // Nama terbaru dari user
+            'role' => $testimoni->user->role ?? 'user',
+            'avatar_url' => $avatarUrl, // ⭐ SELALU avatar terbaru
+        ],
+        'product_photo_url' => $productPhotoUrl,
+    ];
+}
 
     public function getApprovedTestimonials()
     {
