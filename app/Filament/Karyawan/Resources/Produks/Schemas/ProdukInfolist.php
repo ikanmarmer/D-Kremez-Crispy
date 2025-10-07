@@ -5,9 +5,11 @@ namespace App\Filament\Karyawan\Resources\Produks\Schemas;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\IconSize;
+use Filament\Support\Enums\TextSize;
 
 class ProdukInfolist
 {
@@ -16,132 +18,200 @@ class ProdukInfolist
         return $schema
             ->columns(1)
             ->components([
-                Section::make('🛍️ Informasi Produk')
+                // Section Informasi Produk
+                Section::make('Informasi Produk')
                     ->description('Detail lengkap produk')
-                    ->columns(3)
+                    ->icon('heroicon-o-shopping-bag')
                     ->schema([
-                        ImageEntry::make('image')
-                            ->label('')
-                            ->placeholder('Tidak ada gambar')
-                            ->height(150)
-                            ->width(150)
-                            ->extraAttributes([
-                                'class' => 'rounded-xl shadow-xl border-4 border-white dark:border-gray-700'
+                        Grid::make([
+                            'default' => 1,
+                            'md' => 4,
+                            'lg' => 4,
+                        ])->schema([
+                            // GAMBAR: kolom 1
+                            ImageEntry::make('image')
+                                ->label('Gambar Produk')
+                                ->placeholder('Tidak ada gambar')
+                                ->extraImgAttributes([
+                                    'class' => 'rounded-lg shadow-lg border-gray-200 dark:border-gray-600 object-cover',
+                                ])
+                                ->columnSpan([
+                                    'default' => 1,
+                                    'md' => 1,
+                                    'lg' => 1,
+                                ]),
+
+                            // KANAN: Nama + Kategori (2 kolom) + Status di pojok kanan atas
+                            Grid::make([
+                                'default' => 1,
+                                'md' => 3,
+                                'lg' => 3,
+                            ])->schema([
+                                // Nama Produk
+                                TextEntry::make('nama')
+                                    ->label('Nama Produk')
+                                    ->placeholder('Nama tidak tersedia')
+                                    ->icon('heroicon-o-cube')
+                                    ->color('primary')
+                                    ->weight('font-bold')
+                                    ->size(TextSize::Large)
+                                    ->extraAttributes([
+                                        'class' => 'text-lg break-words',
+                                    ])
+                                    ->columnSpan([
+                                        'default' => 1,
+                                        'md' => 2,
+                                        'lg' => 2,
+                                    ]),
+
+                                // Status di pojok kanan atas (kolom terakhir)
+                                IconEntry::make('aktif')
+                                    ->label('Status')
+                                    ->boolean()
+                                    ->trueIcon('heroicon-o-check-circle')
+                                    ->falseIcon('heroicon-o-x-circle')
+                                    ->trueColor('success')
+                                    ->falseColor('danger')
+                                    ->size(IconSize::Large)
+                                    ->extraAttributes([
+                                        'class' => 'flex items-start justify-end text-lg px-2 py-1 rounded-lg bg-gray-50 dark:bg-gray-900',
+                                    ])
+                                    ->columnSpan([
+                                        'default' => 1,
+                                        'md' => 1,
+                                        'lg' => 1,
+                                    ]),
+
+                                // Kategori (seragam ukuran)
+                                TextEntry::make('kategori')
+                                    ->label('Kategori')
+                                    ->placeholder('Tidak ada kategori')
+                                    ->icon('heroicon-o-tag')
+                                    ->badge()
+                                    ->color('primary')
+                                    ->size(TextSize::Large)
+                                    ->extraAttributes([
+                                        'class' => 'px-2 py-1 text-lg',
+                                    ])
+                                    ->columnSpan([
+                                        'default' => 1,
+                                        'md' => 2,
+                                        'lg' => 3,
+                                    ]),
                             ])
-                            ->columnSpan(1),
-
-                        TextEntry::make('nama')
-                            ->label('Nama Produk')
-                            ->placeholder('Nama tidak tersedia')
-                            ->icon('heroicon-o-cube')
-                            ->color('primary')
-                            ->weight('bold')
-                            ->size('xl')
-                            ->extraAttributes(['class' => 'text-2xl font-bold mb-2'])
-                            ->columnSpan(2),
-
-                        IconEntry::make('aktif')
-                            ->label('Status')
-                            ->boolean()
-                            ->trueIcon('heroicon-o-check-badge')
-                            ->falseIcon('heroicon-o-x-circle')
-                            ->trueColor('success')
-                            ->falseColor('danger')
-                            ->size(IconSize::Large)
-                            ->columnSpan(1),
-
-                        TextEntry::make('kategori')
-                            ->label('Kategori')
-                            ->placeholder('-')
-                            ->icon('heroicon-o-tag')
-                            ->color('info')
-                            ->badge()
-                            ->size('lg')
-                            ->columnSpan(2),
+                                ->extraAttributes([
+                                    'class' => 'gap-4 items-start',
+                                ])
+                                ->columnSpan([
+                                    'default' => 1,
+                                    'md' => 3,
+                                    'lg' => 3,
+                                ]),
+                        ]),
+                    ])
+                    ->extraAttributes([
+                        'class' => 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4',
                     ]),
 
-                Section::make('💰 Harga')
-                    ->description('Informasi harga')
-                    ->columns(3)
+                // Section Harga
+                Section::make('Informasi Harga')
+                    ->description('Detail harga produk')
+                    ->icon('heroicon-o-currency-dollar')
                     ->schema([
-                        TextEntry::make('harga')
-                            ->label('Harga Jual')
-                            ->placeholder('Belum ditetapkan')
-                            ->money('IDR', locale: 'id')
-                            ->icon('heroicon-o-banknotes')
-                            ->color('success')
-                            ->weight('bold')
-                            ->size('xl')
-                            ->copyable()
-                            ->copyMessage('Harga disalin!')
-                            ->extraAttributes([
-                                'class' => 'text-3xl font-black text-emerald-600 dark:text-emerald-400'
-                            ]),
+                        Grid::make(2)
+                            ->schema([
+                                TextEntry::make('harga')
+                                    ->label('Harga Jual')
+                                    ->placeholder('Belum ditetapkan')
+                                    ->money('IDR', locale: 'id')
+                                    ->icon('heroicon-o-banknotes')
+                                    ->color('success')
+                                    ->weight('font-bold')
+                                    ->size(TextSize::Large)
+                                    ->copyable()
+                                    ->copyMessage('Harga disalin!')
+                                    ->extraAttributes([
+                                        'class' => 'text-2xl font-bold text-green-600 dark:text-green-400',
+                                    ]),
 
-                        TextEntry::make('harga_terbilang')
-                            ->label('Terbilang')
-                            ->state(function ($record) {
-                                if ($record && $record->harga) {
-                                    return self::numberToWords($record->harga) . ' rupiah';
-                                }
-                                return '-';
-                            })
-                            ->placeholder('-')
-                            ->icon('heroicon-o-document-text')
-                            ->color('slate')
-                            ->size('sm')
-                            ->columnSpan(1),
+                                TextEntry::make('harga_terbilang')
+                                    ->label('Terbilang')
+                                    ->state(function ($record) {
+                                        if ($record && $record->harga) {
+                                            return self::numberToWords($record->harga).' rupiah';
+                                        }
+
+                                        return 'Tidak ada harga';
+                                    })
+                                    ->placeholder('Tidak ada harga')
+                                    ->icon('heroicon-o-document-text')
+                                    ->color('gray')
+                                    ->size(TextSize::Small)
+                                    ->extraAttributes([
+                                        'class' => 'italic text-gray-600 dark:text-gray-400',
+                                    ]),
+                            ]),
                     ]),
 
-                Section::make('📄 Deskripsi')
-                    ->description('Detail dan spesifikasi produk')
+                // Section Deskripsi
+                Section::make('Deskripsi Produk')
+                    ->description('Penjelasan detail tentang produk')
+                    ->icon('heroicon-o-document-text')
                     ->schema([
                         TextEntry::make('deskripsi')
                             ->label('')
-                            ->placeholder('Tidak ada deskripsi tersedia')
-                            ->html()
+                            ->placeholder('Tidak ada deskripsi yang tersedia untuk produk ini.')
                             ->prose()
+                            ->markdown()
                             ->extraAttributes([
-                                'class' => 'text-justify leading-relaxed p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'
+                                'class' => 'p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm min-h-[120px] text-gray-700 dark:text-gray-300 leading-relaxed text-justify',
                             ])
                             ->columnSpanFull(),
                     ])
                     ->collapsible()
-                    ->persistCollapsed(),
+                    ->collapsed(false),
 
-                Section::make('⚙️ Info Sistem')
+                // Section Informasi Sistem
+                Section::make('Informasi Sistem')
                     ->description('Data teknis dan riwayat')
-                    ->columns(2)
-                    ->collapsed()
-                    ->persistCollapsed()
+                    ->icon('heroicon-o-cog-6-tooth')
                     ->schema([
-                        TextEntry::make('created_at')
-                            ->label('Dibuat')
-                            ->dateTime('d M Y, H:i')
-                            ->placeholder('-')
-                            ->icon('heroicon-o-calendar-days')
-                            ->color('success'),
+                        Grid::make(2)
+                            ->schema([
+                                TextEntry::make('created_at')
+                                    ->label('Dibuat Pada')
+                                    ->dateTime('d F Y, H:i')
+                                    ->placeholder('-')
+                                    ->icon('heroicon-o-calendar')
+                                    ->color('gray')
+                                    ->size(TextSize::Small),
 
-                        TextEntry::make('updated_at')
-                            ->label('Diperbarui')
-                            ->dateTime('d M Y, H:i')
-                            ->placeholder('Belum pernah')
-                            ->icon('heroicon-o-pencil-square')
-                            ->color('warning'),
-                    ]),
+                                TextEntry::make('updated_at')
+                                    ->label('Diperbarui Pada')
+                                    ->dateTime('d F Y, H:i')
+                                    ->placeholder('Belum pernah diperbarui')
+                                    ->icon('heroicon-o-arrow-path')
+                                    ->color('gray')
+                                    ->size(TextSize::Small),
+                            ]),
+                    ])
+                    ->collapsible()
+                    ->collapsed(true),
             ]);
     }
 
     /**
-     * Convert number to Indonesian words (optimized)
+     * Convert number to Indonesian words
      */
     private static function numberToWords(int $number): string
     {
-        if ($number == 0) return 'nol';
+        if ($number == 0) {
+            return 'nol';
+        }
 
         $ones = [
             '', 'satu', 'dua', 'tiga', 'empat', 'lima',
-            'enam', 'tujuh', 'delapan', 'sembilan'
+            'enam', 'tujuh', 'delapan', 'sembilan',
         ];
 
         $result = '';
@@ -149,17 +219,21 @@ class ProdukInfolist
         // Billions
         if ($number >= 1000000000) {
             $billions = intval($number / 1000000000);
-            $result .= self::convertHundreds($billions, $ones) . ' miliar';
+            $result .= self::convertHundreds($billions, $ones).' miliar';
             $number %= 1000000000;
-            if ($number > 0) $result .= ' ';
+            if ($number > 0) {
+                $result .= ' ';
+            }
         }
 
         // Millions
         if ($number >= 1000000) {
             $millions = intval($number / 1000000);
-            $result .= self::convertHundreds($millions, $ones) . ' juta';
+            $result .= self::convertHundreds($millions, $ones).' juta';
             $number %= 1000000;
-            if ($number > 0) $result .= ' ';
+            if ($number > 0) {
+                $result .= ' ';
+            }
         }
 
         // Thousands
@@ -168,10 +242,12 @@ class ProdukInfolist
             if ($thousands == 1) {
                 $result .= 'seribu';
             } else {
-                $result .= self::convertHundreds($thousands, $ones) . ' ribu';
+                $result .= self::convertHundreds($thousands, $ones).' ribu';
             }
             $number %= 1000;
-            if ($number > 0) $result .= ' ';
+            if ($number > 0) {
+                $result .= ' ';
+            }
         }
 
         // Hundreds, tens, and ones
@@ -195,22 +271,26 @@ class ProdukInfolist
             if ($hundreds == 1) {
                 $result .= 'seratus';
             } else {
-                $result .= $ones[$hundreds] . ' ratus';
+                $result .= $ones[$hundreds].' ratus';
             }
             $number %= 100;
-            if ($number > 0) $result .= ' ';
+            if ($number > 0) {
+                $result .= ' ';
+            }
         }
 
         // Tens and ones
         if ($number >= 20) {
             $tens = intval($number / 10);
-            $result .= $ones[$tens] . ' puluh';
+            $result .= $ones[$tens].' puluh';
             $number %= 10;
-            if ($number > 0) $result .= ' ' . $ones[$number];
+            if ($number > 0) {
+                $result .= ' '.$ones[$number];
+            }
         } elseif ($number >= 10) {
             $teens = [
                 'sepuluh', 'sebelas', 'dua belas', 'tiga belas', 'empat belas',
-                'lima belas', 'enam belas', 'tujuh belas', 'delapan belas', 'sembilan belas'
+                'lima belas', 'enam belas', 'tujuh belas', 'delapan belas', 'sembilan belas',
             ];
             $result .= $teens[$number - 10];
         } elseif ($number > 0) {

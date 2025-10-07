@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->foreignId('rekap_harian_id')->constrained('rekap_harians')->onDelete('cascade');
             $table->foreignId('produk_id')->constrained('produk')->onDelete('cascade');
             $table->integer('jumlah_terjual');
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
         });
 
