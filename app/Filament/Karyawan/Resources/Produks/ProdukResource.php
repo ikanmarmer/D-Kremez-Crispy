@@ -20,9 +20,14 @@ class ProdukResource extends Resource
 {
     protected static ?string $model = Produk::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $slug = 'produks';
 
-    protected static ?string $recordTitleAttribute = 'Menu';
+    protected static ?string $navigationLabel = 'Produk';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::RectangleStack;
+
+    protected static ?string $recordTitleAttribute = 'nama';
 
     public static function form(Schema $schema): Schema
     {

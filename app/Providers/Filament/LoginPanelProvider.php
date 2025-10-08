@@ -10,6 +10,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
+use Filament\Enums\ThemeMode;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -27,6 +28,7 @@ class LoginPanelProvider extends PanelProvider
             ->authGuard('web')
             ->login(Login::class)
             ->brandName('Login')
+            ->defaultThemeMode(ThemeMode::Dark)
             ->colors([
                 'primary' => Color::hex('#8B4513'), // Coklat tua (seperti coklat chocolate)
                 'secondary' => Color::hex('#D2B48C'), // Coklat tan (warna krem kecoklatan)

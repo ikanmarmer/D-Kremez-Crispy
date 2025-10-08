@@ -20,9 +20,11 @@ class StokMentahResource extends Resource
 {
     protected static ?string $model = StokMentah::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $slug = 'stok-mentah';
+    protected static ?string $navigationLabel = 'Stok Mentah';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube; // contoh icon
+    protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::Cube; // contoh icon
 
-    protected static ?string $recordTitleAttribute = 'StokMentah';
 
     public static function form(Schema $schema): Schema
     {

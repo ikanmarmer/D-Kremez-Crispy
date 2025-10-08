@@ -20,7 +20,11 @@ class ProdukResource extends Resource
 {
     protected static ?string $model = Produk::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $navigationLabel = 'Produk';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Cube; // contohnya
+
+    // protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema
     {

@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\Role;
 use App\Enums\Status;
-use App\Models\Testimoni;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\IconEntry;
@@ -16,6 +15,7 @@ use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\FontWeight;
 use Filament\Notifications\Notification;
 use Filament\Actions\Action;
+use Filament\Support\Enums\Width;
 use Illuminate\Support\HtmlString;
 
 class UserInfolist
@@ -23,17 +23,16 @@ class UserInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-
             // SECTION: Profil Pengguna
             Section::make('Profil Pengguna')
                 ->description('Informasi dasar pengguna')
                 ->icon('heroicon-o-user-circle')
                 ->extraAttributes([
-                    'class' => 'overflow-hidden bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-0 shadow-lg rounded-xl'
+                    'class' => 'overflow-hidden bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-0 shadow-lg rounded-xl',
                 ])
                 ->schema([
                     Flex::make([
-                        // Sub-section: Avatar  
+                        // Sub-section: Avatar
                         Section::make([
                             ImageEntry::make('avatar')
                                 ->label('')
@@ -43,27 +42,43 @@ class UserInfolist
                                 ->size(120)
                                 ->extraImgAttributes([
                                     'class' => 'ring-4 ring-white dark:ring-gray-800 shadow-xl cursor-pointer',
-                                    'onclick' => "window.dispatchEvent(new CustomEvent('open-avatar-preview', { detail: { src: this.src } }))",
                                 ])
                                 ->action(
                                     Action::make('previewAvatar')
-                                        ->label('Preview')
-                                        ->icon('heroicon-o-magnifying-glass-plus')
-                                        ->modalHeading('Preview Avatar')
-                                        ->modalWidth('7xl')
+                                        ->label('Preview Avatar')
+                                        ->modalHeading('Preview Avatar Pengguna')
+                                        ->modalContent(function ($record) {
+                                            $url = $record->avatar
+                                                ? asset('storage/' . $record->avatar)
+                                                : null;
+
+                                            return new HtmlString(
+                                                $url
+                                                ? "
+<div class='flex items-center justify-center w-full h-full'>
+  <div class='relative bg-white rounded-lg shadow-xl overflow-hidden
+              w-full max-w-[600px] aspect-square'>
+    <div class='w-full h-full flex items-center justify-center bg-gray-100'>
+      <img
+        src='{$url}''
+        alt='{$record->name} Avatar'
+        class='w-full h-full object-contain p-2'
+      />
+    </div>
+  </div>
+</div>
+        "
+                                                : "
+        <div class='text-center text-gray-400 py-8'>
+            Belum ada avatar.
+        </div>
+        "
+                                            );
+                                        })
+                                        ->modalWidth(Width::Large)
+                                        ->closeModalByClickingAway()
                                         ->modalSubmitAction(false)
                                         ->modalCancelAction(false)
-                                        ->closeModalByClickingAway()
-                                        ->modalContent(fn($record) => new HtmlString(
-                                            $record->avatar
-                                            ? "<div class='flex justify-center'>
-                          <img src='" . asset('storage/' . $record->avatar) . "'
-                               alt='Avatar'
-                               class='max-h-[80vh] w-auto rounded-xl shadow-lg object-contain cursor-zoom-in'
-                               onclick='this.classList.toggle(\"scale-150\")'>
-                       </div>"
-                                            : "<div class='text-gray-400'>Belum ada avatar</div>"
-                                        ))
                                 )
                         ])
                             ->extraAttributes(['class' => 'flex justify-center items-center'])
@@ -76,7 +91,7 @@ class UserInfolist
                                 ->size(TextSize::Large)
                                 ->weight(FontWeight::Bold)
                                 ->extraAttributes([
-                                    'class' => 'text-2xl font-bold text-gray-900 dark:text-white mb-2'
+                                    'class' => 'text-2xl font-bold text-gray-900 dark:text-white mb-2',
                                 ]),
 
                             TextEntry::make('email')
@@ -118,7 +133,7 @@ class UserInfolist
                 ->description('Informasi penciptaan dan pembaruan akun')
                 ->icon('heroicon-o-calendar-days')
                 ->extraAttributes([
-                    'class' => 'rounded-lg'
+                    'class' => 'rounded-lg',
                 ])
                 ->columns([
                     'default' => 1,
@@ -127,7 +142,7 @@ class UserInfolist
                 ->schema([
                     TextEntry::make('created_at')
                         ->label('Akun Dibuat')
-                        ->icon('heroicon-m-plus-circle') // ✅ New icon added
+                        ->icon('heroicon-m-plus-circle')
                         ->dateTime()
                         ->since()
                         ->tooltip(fn($state) => $state?->format('d M Y, H:i:s'))
@@ -136,7 +151,7 @@ class UserInfolist
 
                     TextEntry::make('updated_at')
                         ->label('Terakhir Diperbarui')
-                        ->icon('heroicon-m-pencil-square') // ✅ New icon added
+                        ->icon('heroicon-m-pencil-square')
                         ->dateTime()
                         ->since()
                         ->tooltip(fn($state) => $state?->format('d M Y, H:i:s'))
@@ -144,7 +159,7 @@ class UserInfolist
                         ->columnSpan(1),
                 ]),
 
-            // Section: Foto Produk. Menggunakan ->hidden()
+            // SECTION: Foto Produk
             Section::make('Foto Produk')
                 ->icon('heroicon-o-photo')
                 ->hidden(fn($record) => $record->testimonial === null)
@@ -156,32 +171,49 @@ class UserInfolist
                         ->height(300)
                         ->extraImgAttributes([
                             'class' => 'w-full h-full max-w-md mx-auto rounded-lg object-cover shadow-md cursor-pointer',
-                            'onclick' => "window.dispatchEvent(new CustomEvent('open-product-preview', { detail: { src: this.src } }))",
                         ])
                         ->action(
-                            Action::make('previewProduct')
-                                ->label('Preview')
-                                ->icon('heroicon-o-magnifying-glass-plus')
+                            Action::make('previewProductPhoto')
+                                ->label('Preview Foto Produk')
                                 ->modalHeading('Preview Foto Produk')
-                                ->modalWidth('7xl')
+                                ->modalContent(function ($record) {
+                                    $url = $record->avatar
+                                        ? asset('storage/' . $record->avatar)
+                                        : null;
+
+                                    return new HtmlString(
+                                        $url
+                                        ? "
+        <div class='flex items-center justify-center w-full h-full p-4'>
+          <div class='relative bg-white rounded-lg shadow-lg overflow-hidden
+                      w-full max-w-[600px]'>
+            <div class='w-full aspect-square flex items-center justify-center bg-gray-50'>
+              <img
+                src='{$url}'
+                alt='{$record->name} Avatar'
+                class='w-full h-full object-contain'
+                style='max-width: 100%; max-height: 100%;'
+              />
+            </div>
+          </div>
+        </div>
+        "
+                                        : "
+        <div class='text-center text-gray-400 py-8'>
+            Belum ada avatar.
+        </div>
+        "
+                                    );
+                                })
+                                ->modalWidth(Width::ExtraLarge)
+                                ->closeModalByClickingAway()
                                 ->modalSubmitAction(false)
                                 ->modalCancelAction(false)
-                                ->closeModalByClickingAway()
-                                ->modalContent(fn($record) => new HtmlString(
-                                    $record->product_photo
-                                    ? "<div class='flex justify-center'>
-                          <img src='" . asset('storage/' . $record->product_photo) . "'
-                               alt='Foto Produk'
-                               class='max-h-[80vh] w-auto rounded-xl shadow-lg object-contain cursor-zoom-in'
-                               onclick='this.classList.toggle(\"scale-150\")'>
-                       </div>"
-                                    : "<div class='text-gray-400'>Tidak ada foto produk</div>"
-                                ))
                         )
                         ->columnSpanFull(),
                 ]),
 
-            // Section: Testimoni. Menggunakan ->hidden() untuk menyembunyikan jika tidak ada testimoni.
+            // Section: Testimoni
             Section::make('Detail Testimoni')
                 ->icon('heroicon-o-clipboard-document-list')
                 ->description('Status dan informasi teknis testimoni')
@@ -246,14 +278,12 @@ class UserInfolist
                             'lg' => 3,
                         ])
                 ])
-                ->visible(
-                    fn($record) =>
-                    $record->testimonial?->status === 'Menunggu'
-                ),
-            // Section: Menggunakan ->hidden()
+                ->visible(fn($record) => $record->testimonial?->status === 'Menunggu'),
+
+            // Section: Isi Testimoni
             Section::make('Isi Testimoni')
                 ->icon('heroicon-o-chat-bubble-bottom-center-text')
-                ->collapsible() // 🔽 isi bisa dilipat
+                ->collapsible()
                 ->hidden(fn($record) => $record->testimonial === null)
                 ->schema([
                     TextEntry::make('testimonial.content')
@@ -263,8 +293,7 @@ class UserInfolist
                         ->columnSpanFull(),
                 ]),
 
-
-            // Section: Moderasi. Menggunakan ->hidden()
+            // Section: Moderasi
             Section::make('Moderasi')
                 ->icon('heroicon-o-adjustments-horizontal')
                 ->description('Pilih tindakan untuk testimoni ini.')
@@ -301,13 +330,10 @@ class UserInfolist
                                     ->danger()
                                     ->send();
                             }),
-                    ])->gap(3), // jarak antar tombol
+                    ])->gap(3),
                 ])
                 ->columns(2)
-                ->visible(
-                    fn($record) =>
-                    $record->testimonial?->status === 'Menunggu'
-                ),
+                ->visible(fn($record) => $record->testimonial?->status === 'Menunggu'),
         ]);
     }
 }

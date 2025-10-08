@@ -27,6 +27,10 @@ class ProduksTable
                     ->boolean(),
                 TextColumn::make('kategori')
                     ->searchable(),
+                TextColumn::make('deskripsi')
+                    ->limit(50)
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -42,23 +42,26 @@ class UsersTable
                                 return new HtmlString(
                                     $url
                                     ? "
-                        <div class='flex flex-col items-center space-y-4'>
-                            <img
-                                src='{$url}'
-                                alt='{$record->name} Avatar'
-                                class='max-h-[80vh] w-auto rounded-xl shadow-lg object-contain cursor-zoom-in'
-                                onclick='this.classList.toggle(\"scale-150\")'
-                            >
-                        </div>
-                    "
+        <div class='flex items-center justify-center w-full h-full'>
+          <div class='relative bg-gray-50 rounded-lg shadow-lg overflow-hidden
+                      w-full max-w-[90vw] sm:max-w-md md:max-w-lg lg:max-w-xl
+                      aspect-square'>
+            <img
+              src='{$url}'
+              alt='{$record->name} Avatar'
+              class='w-full h-full object-contain object-center'
+            />
+          </div>
+        </div>
+        "
                                     : "
-                        <div class='text-gray-400'>
-                            Belum ada avatar.
-                        </div>
-                    "
+        <div class='text-gray-400'>
+            Belum ada avatar.
+        </div>
+        "
                                 );
                             })
-                            ->modalWidth('7xl')
+                            ->modalWidth('auto')  // biar width ditentukan oleh konten/modalContent
                             ->closeModalByClickingAway()
                             ->modalSubmitAction(false)
                             ->modalCancelAction(false)

@@ -15,6 +15,13 @@ class RekapHarian extends Model
         'catatan',
     ];
 
+    protected $casts = [
+        'tanggal' => 'date',
+        'total_omzet' => 'float',
+        'jumlah_pelanggan' => 'integer',
+        'total_pengeluaran' => 'float',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id_users');
@@ -22,14 +29,14 @@ class RekapHarian extends Model
 
     public function produks()
     {
-        return $this->belongsToMany(Produk::class, 'produk_rekap_harian')
+        return $this->belongsToMany(Produk::class, 'produk_rekap_harians')
             ->withPivot('jumlah_terjual')
             ->withTimestamps();
     }
 
     public function ProdukRekapHarian()
     {
-        return $this->hasMany(ProdukRekapHarian::class);
+        return $this->hasMany(ProdukRekapHarian::class, 'rekap_harian_id', 'id');
     }
 }
 

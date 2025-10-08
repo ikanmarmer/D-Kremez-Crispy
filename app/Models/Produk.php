@@ -19,6 +19,8 @@ class Produk extends Model
         'harga',
         'image',
         'aktif',
+        'deskripsi',
+        'kategori',
     ];
 
     protected $casts = [
@@ -41,6 +43,7 @@ class Produk extends Model
                     ->withPivot('jumlah_terjual')
                     ->withTimestamps();
     }
+
      public function produkRekapHarians()
     {
         return $this->hasMany(ProdukRekapHarian::class, 'produk_id', 'id');

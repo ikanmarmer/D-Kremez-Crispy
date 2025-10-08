@@ -1,5 +1,7 @@
 <?php
 
+use Filament\Facades\Filament;
+use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
@@ -12,7 +14,7 @@ use App\Enums\Role;
 */
 
 // Route utama dengan pengecekan autentikasi
-Route::get('/', function () {
+Route::get('/', action: function () {
     if (auth()->check()) {
         $user = auth()->user();
 
@@ -29,6 +31,8 @@ Route::get('/', function () {
 })->name('home');
 
 
+
+// Tes email
 Route::get('/tes-email', function () {
     Mail::raw('Tes kirim email dari Laravel', function ($m) {
         $m->to('muhamadkeiza.ddd@gmail.com')->subject('Tes Email');
@@ -37,12 +41,10 @@ Route::get('/tes-email', function () {
     return 'Email berhasil dikirim';
 });
 
-Route::get('/auth/redirect', function () {
-    return Socialite::driver('google')->redirect();
-});
+// Google OAuth
+Route::get('/auth/redirect', fn() => Socialite::driver('google')->redirect());
 
 Route::get('/auth/callback', function () {
     $user = Socialite::driver('google')->user();
-
     // $user->token
 });

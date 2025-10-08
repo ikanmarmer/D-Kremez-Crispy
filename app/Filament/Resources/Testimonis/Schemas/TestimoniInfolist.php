@@ -41,27 +41,43 @@ class TestimoniInfolist
                                     ->size(120)
                                     ->extraImgAttributes([
                                         'class' => 'ring-4 ring-white dark:ring-gray-800 shadow-xl cursor-pointer',
-                                        'onclick' => "window.dispatchEvent(new CustomEvent('open-avatar-preview', { detail: { src: this.src } }))",
                                     ])
                                     ->action(
                                         Action::make('previewAvatar')
-                                            ->label('Preview')
-                                            ->icon('heroicon-o-magnifying-glass-plus')
-                                            ->modalHeading('Preview Avatar')
-                                            ->modalWidth('7xl')
+                                            ->label('Preview Avatar')
+                                            ->modalHeading('Preview Avatar Pengguna')
+                                            ->modalContent(function ($record) {
+                                                $url = $record->user && $record->user->avatar
+                                                    ? asset('storage/' . $record->user->avatar)
+                                                    : null;
+
+                                                return new HtmlString(
+                                                    $url
+                                                    ? "
+<div class='flex items-center justify-center w-full h-full'>
+  <div class='relative bg-white rounded-lg shadow-xl overflow-hidden
+              w-full max-w-[600px] aspect-square'>
+    <div class='w-full h-full flex items-center justify-center bg-gray-100'>
+      <img
+        src='{$url}'
+        alt='{$record->user->name} Avatar'
+        class='w-full h-full object-contain p-2'
+      />
+    </div>
+  </div>
+</div>
+"
+                                                    : "
+<div class='text-center text-gray-400 py-8'>
+    Belum ada avatar.
+</div>
+"
+                                                );
+                                            })
+                                            ->modalWidth(\Filament\Support\Enums\Width::Large)
+                                            ->closeModalByClickingAway()
                                             ->modalSubmitAction(false)
                                             ->modalCancelAction(false)
-                                            ->closeModalByClickingAway()
-                                            ->modalContent(fn($record) => new HtmlString(
-                                                $record->avatar
-                                                ? "<div class='flex justify-center'>
-                          <img src='" . asset('storage/' . $record->avatar) . "'
-                               alt='Avatar'
-                               class='max-h-[80vh] w-auto rounded-xl shadow-lg object-contain cursor-zoom-in'
-                               onclick='this.classList.toggle(\"scale-150\")'>
-                       </div>"
-                                                : "<div class='text-gray-400'>Belum ada avatar</div>"
-                                            ))
                                     )
                             ])
                                 ->extraAttributes(['class' => 'flex justify-center items-center'])
@@ -191,27 +207,43 @@ class TestimoniInfolist
                             ->height(300)
                             ->extraImgAttributes([
                                 'class' => 'w-full h-full max-w-md mx-auto rounded-lg object-cover shadow-md cursor-pointer',
-                                'onclick' => "window.dispatchEvent(new CustomEvent('open-product-preview', { detail: { src: this.src } }))",
                             ])
                             ->action(
-                                Action::make('previewProduct')
-                                    ->label('Preview')
-                                    ->icon('heroicon-o-magnifying-glass-plus')
+                                Action::make('previewProductPhoto')
+                                    ->label('Preview Foto Produk')
                                     ->modalHeading('Preview Foto Produk')
-                                    ->modalWidth('7xl')
+                                    ->modalContent(function ($record) {
+                                        $url = $record->product_photo
+                                            ? asset('storage/' . $record->product_photo)
+                                            : null;
+
+                                        return new HtmlString(
+                                            $url
+                                            ? "
+<div class='flex items-center justify-center w-full h-full'>
+  <div class='relative bg-white rounded-lg shadow-xl overflow-hidden
+              w-full max-w-[600px] aspect-square'>
+    <div class='w-full h-full flex items-center justify-center bg-gray-100'>
+      <img
+        src='{$url}'
+        alt='Foto Produk'
+        class='w-full h-full object-contain p-2'
+      />
+    </div>
+  </div>
+</div>
+"
+                                            : "
+<div class='text-center text-gray-400 py-8'>
+    Tidak ada foto produk.
+</div>
+"
+                                        );
+                                    })
+                                    ->modalWidth(\Filament\Support\Enums\Width::Large)
+                                    ->closeModalByClickingAway()
                                     ->modalSubmitAction(false)
                                     ->modalCancelAction(false)
-                                    ->closeModalByClickingAway()
-                                    ->modalContent(fn($record) => new HtmlString(
-                                        $record->product_photo
-                                        ? "<div class='flex justify-center'>
-                          <img src='" . asset('storage/' . $record->product_photo) . "'
-                               alt='Foto Produk'
-                               class='max-h-[80vh] w-auto rounded-xl shadow-lg object-contain cursor-zoom-in'
-                               onclick='this.classList.toggle(\"scale-150\")'>
-                       </div>"
-                                        : "<div class='text-gray-400'>Tidak ada foto produk</div>"
-                                    ))
                             )
                             ->columnSpanFull(),
                     ]),
@@ -221,7 +253,7 @@ class TestimoniInfolist
                  */
                 Section::make('Isi Testimoni')
                     ->icon('heroicon-o-chat-bubble-bottom-center-text')
-                    ->collapsible() // 🔽 isi bisa dilipat
+                    ->collapsible()
                     ->schema([
                         TextEntry::make('content')
                             ->label('Testimoni')
@@ -229,6 +261,7 @@ class TestimoniInfolist
                             ->prose()
                             ->columnSpanFull(),
                     ]),
+
                 /**
                  * 🎛️ Action Bar (Moderation Controls)
                  */
@@ -268,11 +301,10 @@ class TestimoniInfolist
                                         ->danger()
                                         ->send();
                                 }),
-                        ])->gap(3), // jarak antar tombol
+                        ])->gap(3),
                     ])
                     ->columns(2)
-                    ->visible(fn($record) =>
-                        $record->status === 'Menunggu'),
+                    ->visible(fn($record) => $record->status === 'Menunggu'),
             ]);
     }
 }

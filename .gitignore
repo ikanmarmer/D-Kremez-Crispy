@@ -28,3 +28,4 @@ composer.json.bak
 resources/views/test-api.blade.php
 resources/views/welcome.blade.php
 app/Http/Controllers/TestAPIController.php
+database\seeders\RekapHarianSeeder.php

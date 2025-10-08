@@ -71,6 +71,28 @@ class User extends Authenticatable implements FilamentUser
         };
     }
 
+    //     public function canAccessPanel(Panel $panel): bool
+    // {
+    //     // 1. Otorisasi untuk Panel Admin (misalnya, dengan ID 'admin')
+    //     if ($panel->getId() === 'admin') {
+    //         // Ganti 'isAdmin()' dengan metode atau properti yang benar untuk Role Admin Anda.
+    //         // Contoh: $this->hasRole('Admin') jika menggunakan Spatie/RolesPermissions.
+    //         // Kita larang akses jika user BUKAN Admin.
+    //         return $this->hasRole('Admin');
+    //     }
+
+    //     // 2. Otorisasi untuk Panel Karyawan (misalnya, dengan ID 'karyawan')
+    //     if ($panel->getId() === 'karyawan') {
+    //         // Kita izinkan akses jika user adalah Karyawan.
+    //         return $this->hasRole('Karyawan');
+    //     }
+
+    //     // Izinkan akses ke panel lain jika tidak ada batasan spesifik.
+    //     return true;
+    // }
+
+    /**
+     * Relationships
     /**
      * Relation
      */
