@@ -12,13 +12,15 @@ use BackedEnum;
 use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class TestimoniResource extends Resource
 {
     protected static ?string $model = Testimoni::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
+    protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::ChatBubbleLeftRight;
 
     protected static string|UnitEnum|null $navigationGroup = 'Kelola';
 

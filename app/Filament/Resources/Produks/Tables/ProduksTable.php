@@ -18,22 +18,36 @@ class ProduksTable
         return $table
             ->columns([
                 TextColumn::make('nama')
+                    ->label('Nama')
                     ->searchable(),
                 TextColumn::make('harga')
+                    ->label('Harga')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('stok')
-                    ->numeric()
-                    ->sortable(),
-                ImageColumn::make('image'),
-                TextColumn::make('dibuat_pada')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('diperbarui_pada')
-                    ->dateTime()
-                    ->sortable(),
+                ImageColumn::make('image')
+                    ->label('Gambar Produk')
+                    ->disk('public'),
                 IconColumn::make('aktif')
+                    ->label('Aktif')
                     ->boolean(),
+                TextColumn::make('kategori')
+                    ->label('Kategori')
+                    ->searchable(),
+                TextColumn::make('deskripsi')
+                    ->label('Deskripsi')
+                    ->limit(50)
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->label('Dibuat Pada')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->label('Diperbarui Pada')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

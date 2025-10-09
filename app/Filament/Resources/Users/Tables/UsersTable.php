@@ -14,6 +14,9 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\MultiSelectFilter;
 use Filament\Tables\Table;
+use Filament\Support\Enums\Width;
+
+
 use App\Enums\Role;
 
 class UsersTable
@@ -43,7 +46,7 @@ class UsersTable
                                     $url
                                     ? "
         <div class='flex items-center justify-center w-full h-full'>
-          <div class='relative bg-gray-50 rounded-lg shadow-lg overflow-hidden
+          <div class='relative bg-gray-100 rounded-lg shadow-lg overflow-hidden
                       w-full max-w-[90vw] sm:max-w-md md:max-w-lg lg:max-w-xl
                       aspect-square'>
             <img
@@ -61,7 +64,7 @@ class UsersTable
         "
                                 );
                             })
-                            ->modalWidth('auto')  // biar width ditentukan oleh konten/modalContent
+                            ->modalWidth(Width::Large)  // biar width ditentukan oleh konten/modalContent
                             ->closeModalByClickingAway()
                             ->modalSubmitAction(false)
                             ->modalCancelAction(false)

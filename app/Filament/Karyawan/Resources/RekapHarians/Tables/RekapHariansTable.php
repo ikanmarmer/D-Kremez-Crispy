@@ -57,12 +57,42 @@ class RekapHariansTable
                 BulkActionGroup::make(actions: [
                     ExportBulkAction::make()
                         ->deselectRecordsAfterCompletion()
-                        ->color('secondary'), // opsional: agar pilihan dibersihkan setelah export
+                        ->exports([
+                            ExcelExport::make()
+                                ->fromTable()
+                                ->except([
+                                    'created_at',
+                                    'updated_at',
+                                ])
+                                ->withColumns([
+                                    ExcelColumn::make('user.name')->heading('Karyawan'),
+                                    ExcelColumn::make('tanggal')->heading('Tanggal'),
+                                    ExcelColumn::make('total_omzet')->heading('Total Omzet')
+                                        ->format('_-"Rp "* #,##0.00_-')
+                                        ->width(15),
+                                    ExcelColumn::make('jumlah_pelanggan')->heading('Jumlah Pelanggan'),
+                                    ExcelColumn::make('total_pengeluaran')->heading('Total Pengeluaran')
+                                        ->format('_-"Rp "* #,##0.00_-'),
+                                    ExcelColumn::make('catatan')->heading('Catatan'),
+                                ])
+                                ->withFilename(function ($livewire, $livewireClass, $resource, $model, $recordIds, $query) {
+                                    $records = $model::whereKey($recordIds)->get();
+                                    if ($records->count() === 1) {
+                                        $date = $records->first()->created_at->format('Y-m-d');
+                                        return "rekap_{$date}";
+                                    }
+                                    $dates = $records->pluck('created_at')->map(fn($dt) => \Illuminate\Support\Carbon::parse($dt));
+                                    $min = $dates->min()->format('Y-m-d');
+                                    $max = $dates->max()->format('Y-m-d');
+                                    return "rekap_dari_{$min}_sampai_{$max}";
+                                }),
+                        ])
+                        ->color('secondary'),
                     DeleteBulkAction::make()
                         ->requiresConfirmation(),
                 ]),
                 ExportAction::make()
-                    ->tooltip('Ekspor seluruh rekap  ke Excel')  // <— ini tooltip
+                    ->tooltip('Ekspor seluruh rekap ke Excel')
                     ->exports([
                         ExcelExport::make()
                             ->fromTable()
@@ -74,17 +104,24 @@ class RekapHariansTable
                                 ExcelColumn::make('user.name')->heading('Karyawan'),
                                 ExcelColumn::make('tanggal')->heading('Tanggal'),
                                 ExcelColumn::make('total_omzet')->heading('Total Omzet')
-                                    ->format('_("Rp"* #,##0.00_);_("Rp"* \(#,##0.00\);_("Rp"* "-"??_);_(@_)')
+                                    ->format('_-"Rp "* #,##0.00_-')
                                     ->width(15),
                                 ExcelColumn::make('jumlah_pelanggan')->heading('Jumlah Pelanggan'),
-                                ExcelColumn::make('total_pengeluaran')->heading('Total Pengeluaran'),
+                                ExcelColumn::make('total_pengeluaran')->heading('Total Pengeluaran')
+                                    ->format('_-"Rp "* #,##0.00_-'),
                                 ExcelColumn::make('catatan')->heading('Catatan'),
                             ])
-                            // kamu bisa pilih kolom / exclude jika ingin:
-                        // ->except(['updated_at'])
-                            ->withFilename(fn() => 'rekap_harian_' . now()->format('Ymd_His')),
+                            ->withFilename(function ($livewire, $livewireClass, $resource, $model, $recordIds, $query) {
+                                $dates = $query->get()->pluck('created_at')->map(fn($dt) => \Illuminate\Support\Carbon::parse($dt));
+                                if ($dates->isEmpty()) {
+                                    return "semua_rekapan";
+                                }
+                                $min = $dates->min()->format('Y-m-d');
+                                $max = $dates->max()->format('Y-m-d');
+                                return $min === $max ? "rekap_{$min}" : "rekap_dari_{$min}_sampai_{$max}";
+                            }),
                     ]),
             ])
-            ->selectCurrentPageOnly();;
+            ->selectCurrentPageOnly();
     }
 }

@@ -55,21 +55,20 @@ class UserInfolist
                                             return new HtmlString(
                                                 $url
                                                 ? "
-<div class='flex items-center justify-center w-full h-full'>
-  <div class='relative bg-white rounded-lg shadow-xl overflow-hidden
-              w-full max-w-[600px] aspect-square'>
-    <div class='w-full h-full flex items-center justify-center bg-gray-100'>
-      <img
-        src='{$url}''
-        alt='{$record->name} Avatar'
-        class='w-full h-full object-contain p-2'
-      />
-    </div>
-  </div>
-</div>
+        <div class='flex items-center justify-center w-full h-full'>
+          <div class='relative bg-gray-50 rounded-lg shadow-lg overflow-hidden
+                      w-full max-w-[90vw] sm:max-w-md md:max-w-lg lg:max-w-xl
+                      aspect-square'>
+            <img
+              src='{$url}'
+              alt='{$record->name} Avatar'
+              class='w-full h-full object-contain object-center'
+            />
+          </div>
+        </div>
         "
                                                 : "
-        <div class='text-center text-gray-400 py-8'>
+        <div class='text-gray-400'>
             Belum ada avatar.
         </div>
         "
@@ -177,35 +176,33 @@ class UserInfolist
                                 ->label('Preview Foto Produk')
                                 ->modalHeading('Preview Foto Produk')
                                 ->modalContent(function ($record) {
-                                    $url = $record->avatar
-                                        ? asset('storage/' . $record->avatar)
+                                    $url = $record->product_photo
+                                        ? asset('storage/' . $record->testimonial->product_photo)
                                         : null;
 
                                     return new HtmlString(
                                         $url
                                         ? "
-        <div class='flex items-center justify-center w-full h-full p-4'>
-          <div class='relative bg-white rounded-lg shadow-lg overflow-hidden
-                      w-full max-w-[600px]'>
-            <div class='w-full aspect-square flex items-center justify-center bg-gray-50'>
-              <img
-                src='{$url}'
-                alt='{$record->name} Avatar'
-                class='w-full h-full object-contain'
-                style='max-width: 100%; max-height: 100%;'
-              />
-            </div>
-          </div>
-        </div>
-        "
+        <div class='flex items-center justify-center w-full h-full'>
+          <div class='relative bg-gray-50 rounded-lg shadow-lg overflow-hidden
+                      w-full max-w-[90vw] sm:max-w-md md:max-w-lg lg:max-w-xl
+                      aspect-square'>
+      <img
+        src='{$url}'
+        alt='Foto Produk'
+        class='w-full h-full object-contain p-2'
+      />
+  </div>
+</div>
+"
                                         : "
-        <div class='text-center text-gray-400 py-8'>
-            Belum ada avatar.
-        </div>
-        "
+<div class='text-center text-gray-400'>
+    Tidak ada foto produk.
+</div>
+"
                                     );
                                 })
-                                ->modalWidth(Width::ExtraLarge)
+                                ->modalWidth(Width::Large)
                                 ->closeModalByClickingAway()
                                 ->modalSubmitAction(false)
                                 ->modalCancelAction(false)
@@ -277,8 +274,7 @@ class UserInfolist
                             'md' => 2,
                             'lg' => 3,
                         ])
-                ])
-                ->visible(fn($record) => $record->testimonial?->status === 'Menunggu'),
+                ]),
 
             // Section: Isi Testimoni
             Section::make('Isi Testimoni')

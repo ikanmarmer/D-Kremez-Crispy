@@ -54,21 +54,21 @@ class TestimoniInfolist
                                                 return new HtmlString(
                                                     $url
                                                     ? "
-<div class='flex items-center justify-center w-full h-full'>
-  <div class='relative bg-white rounded-lg shadow-xl overflow-hidden
-              w-full max-w-[600px] aspect-square'>
-    <div class='w-full h-full flex items-center justify-center bg-gray-100'>
-      <img
+        <div class='flex items-center justify-center w-full h-full'>
+          <div class='relative bg-gray-50 rounded-lg shadow-lg overflow-hidden
+                      w-full max-w-[90vw] sm:max-w-md md:max-w-lg lg:max-w-xl
+                      aspect-square'>
+            <img
         src='{$url}'
         alt='{$record->user->name} Avatar'
-        class='w-full h-full object-contain p-2'
+              class='w-full h-full object-contain object-center'
       />
     </div>
   </div>
 </div>
 "
                                                     : "
-<div class='text-center text-gray-400 py-8'>
+<div class='text-center text-gray-400'>
     Belum ada avatar.
 </div>
 "
@@ -220,21 +220,20 @@ class TestimoniInfolist
                                         return new HtmlString(
                                             $url
                                             ? "
-<div class='flex items-center justify-center w-full h-full'>
-  <div class='relative bg-white rounded-lg shadow-xl overflow-hidden
-              w-full max-w-[600px] aspect-square'>
-    <div class='w-full h-full flex items-center justify-center bg-gray-100'>
+        <div class='flex items-center justify-center w-full h-full'>
+          <div class='relative bg-gray-50 rounded-lg shadow-lg overflow-hidden
+                      w-full max-w-[90vw] sm:max-w-md md:max-w-lg lg:max-w-xl
+                      aspect-square'>
       <img
         src='{$url}'
         alt='Foto Produk'
         class='w-full h-full object-contain p-2'
       />
-    </div>
   </div>
 </div>
 "
                                             : "
-<div class='text-center text-gray-400 py-8'>
+<div class='text-center text-gray-400'>
     Tidak ada foto produk.
 </div>
 "

@@ -6,9 +6,9 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\IconSize;
 use Filament\Support\Enums\TextSize;
 
 class ProdukInfolist
@@ -20,94 +20,63 @@ class ProdukInfolist
             ->components([
                 // Section Informasi Produk
                 Section::make('Informasi Produk')
-                    ->description('Detail lengkap produk')
-                    ->icon('heroicon-o-shopping-bag')
                     ->schema([
-                        Grid::make([
-                            'default' => 1,
-                            'md' => 4,
-                            'lg' => 4,
-                        ])->schema([
-                            // GAMBAR: kolom 1
+                        Flex::make([
                             ImageEntry::make('image')
                                 ->label('Gambar Produk')
-                                ->placeholder('Tidak ada gambar')
+                                ->disk('public')
                                 ->extraImgAttributes([
-                                    'class' => 'rounded-lg shadow-lg border-gray-200 dark:border-gray-600 object-cover',
+                                    'class' => 'mr-4 ring-4 ring-white dark:ring-gray-800 shadow-xl cursor-pointer rounded-lg border-gray-200 dark:border-gray-600 object-cover',
                                 ])
-                                ->columnSpan([
-                                    'default' => 1,
-                                    'md' => 1,
-                                    'lg' => 1,
-                                ]),
+                                ->grow(false),
 
-                            // KANAN: Nama + Kategori (2 kolom) + Status di pojok kanan atas
-                            Grid::make([
-                                'default' => 1,
-                                'md' => 3,
-                                'lg' => 3,
-                            ])->schema([
+                            Flex::make([
                                 // Nama Produk
                                 TextEntry::make('nama')
                                     ->label('Nama Produk')
-                                    ->placeholder('Nama tidak tersedia')
                                     ->icon('heroicon-o-cube')
-                                    ->color('primary')
-                                    ->weight('font-bold')
-                                    ->size(TextSize::Large)
                                     ->extraAttributes([
                                         'class' => 'text-lg break-words',
                                     ])
-                                    ->columnSpan([
-                                        'default' => 1,
-                                        'md' => 2,
-                                        'lg' => 2,
-                                    ]),
-
-                                // Status di pojok kanan atas (kolom terakhir)
-                                IconEntry::make('aktif')
-                                    ->label('Status')
-                                    ->boolean()
-                                    ->trueIcon('heroicon-o-check-circle')
-                                    ->falseIcon('heroicon-o-x-circle')
-                                    ->trueColor('success')
-                                    ->falseColor('danger')
-                                    ->size(IconSize::Large)
-                                    ->extraAttributes([
-                                        'class' => 'flex items-start justify-end text-lg px-2 py-1 rounded-lg bg-gray-50 dark:bg-gray-900',
-                                    ])
-                                    ->columnSpan([
+                                    ->columnOrder([
                                         'default' => 1,
                                         'md' => 1,
-                                        'lg' => 1,
                                     ]),
 
-                                // Kategori (seragam ukuran)
+                                // Kategori (letakkan sebelum status desktop)
                                 TextEntry::make('kategori')
                                     ->label('Kategori')
-                                    ->placeholder('Tidak ada kategori')
                                     ->icon('heroicon-o-tag')
                                     ->badge()
-                                    ->color('primary')
-                                    ->size(TextSize::Large)
                                     ->extraAttributes([
                                         'class' => 'px-2 py-1 text-lg',
                                     ])
-                                    ->columnSpan([
-                                        'default' => 1,
-                                        'md' => 2,
-                                        'lg' => 3,
+                                    ->columnOrder([
+                                        'default' => 2,  // mobile setelah nama
+                                        'md' => 3,      // di desktop posisinya setelah status
+                                    ]),
+
+                                // Status
+                                IconEntry::make('aktif')
+                                    ->boolean()
+                                    ->trueIcon('heroicon-o-check-circle')
+                                    ->falseIcon('heroicon-o-x-circle')
+                                    ->extraAttributes([
+                                        'class' => 'flex items-start text-lg px-2 py-1 rounded-lg bg-gray-50 dark:bg-gray-900',
+                                    ])
+                                    ->columnOrder([
+                                        'default' => 3,  // mobile setelah kategori
+                                        'md' => 2,       // desktop status tampil sebelum kategori
                                     ]),
                             ])
+                                ->grow(true)
                                 ->extraAttributes([
                                     'class' => 'gap-4 items-start',
-                                ])
-                                ->columnSpan([
-                                    'default' => 1,
-                                    'md' => 3,
-                                    'lg' => 3,
                                 ]),
-                        ]),
+                        ])
+                            ->extraAttributes([
+                                'class' => 'items-start gap-6',
+                            ]),
                     ])
                     ->extraAttributes([
                         'class' => 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4',
@@ -138,7 +107,7 @@ class ProdukInfolist
                                     ->label('Terbilang')
                                     ->state(function ($record) {
                                         if ($record && $record->harga) {
-                                            return self::numberToWords($record->harga).' rupiah';
+                                            return self::numberToWords($record->harga) . ' rupiah';
                                         }
 
                                         return 'Tidak ada harga';
@@ -210,8 +179,16 @@ class ProdukInfolist
         }
 
         $ones = [
-            '', 'satu', 'dua', 'tiga', 'empat', 'lima',
-            'enam', 'tujuh', 'delapan', 'sembilan',
+            '',
+            'satu',
+            'dua',
+            'tiga',
+            'empat',
+            'lima',
+            'enam',
+            'tujuh',
+            'delapan',
+            'sembilan',
         ];
 
         $result = '';
@@ -219,7 +196,7 @@ class ProdukInfolist
         // Billions
         if ($number >= 1000000000) {
             $billions = intval($number / 1000000000);
-            $result .= self::convertHundreds($billions, $ones).' miliar';
+            $result .= self::convertHundreds($billions, $ones) . ' miliar';
             $number %= 1000000000;
             if ($number > 0) {
                 $result .= ' ';
@@ -229,7 +206,7 @@ class ProdukInfolist
         // Millions
         if ($number >= 1000000) {
             $millions = intval($number / 1000000);
-            $result .= self::convertHundreds($millions, $ones).' juta';
+            $result .= self::convertHundreds($millions, $ones) . ' juta';
             $number %= 1000000;
             if ($number > 0) {
                 $result .= ' ';
@@ -242,7 +219,7 @@ class ProdukInfolist
             if ($thousands == 1) {
                 $result .= 'seribu';
             } else {
-                $result .= self::convertHundreds($thousands, $ones).' ribu';
+                $result .= self::convertHundreds($thousands, $ones) . ' ribu';
             }
             $number %= 1000;
             if ($number > 0) {
@@ -271,7 +248,7 @@ class ProdukInfolist
             if ($hundreds == 1) {
                 $result .= 'seratus';
             } else {
-                $result .= $ones[$hundreds].' ratus';
+                $result .= $ones[$hundreds] . ' ratus';
             }
             $number %= 100;
             if ($number > 0) {
@@ -282,15 +259,23 @@ class ProdukInfolist
         // Tens and ones
         if ($number >= 20) {
             $tens = intval($number / 10);
-            $result .= $ones[$tens].' puluh';
+            $result .= $ones[$tens] . ' puluh';
             $number %= 10;
             if ($number > 0) {
-                $result .= ' '.$ones[$number];
+                $result .= ' ' . $ones[$number];
             }
         } elseif ($number >= 10) {
             $teens = [
-                'sepuluh', 'sebelas', 'dua belas', 'tiga belas', 'empat belas',
-                'lima belas', 'enam belas', 'tujuh belas', 'delapan belas', 'sembilan belas',
+                'sepuluh',
+                'sebelas',
+                'dua belas',
+                'tiga belas',
+                'empat belas',
+                'lima belas',
+                'enam belas',
+                'tujuh belas',
+                'delapan belas',
+                'sembilan belas',
             ];
             $result .= $teens[$number - 10];
         } elseif ($number > 0) {

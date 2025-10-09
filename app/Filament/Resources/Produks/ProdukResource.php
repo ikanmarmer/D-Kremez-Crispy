@@ -11,6 +11,7 @@ use App\Filament\Resources\Produks\Schemas\ProdukInfolist;
 use App\Filament\Resources\Produks\Tables\ProduksTable;
 use App\Models\Produk;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -20,11 +21,14 @@ class ProdukResource extends Resource
 {
     protected static ?string $model = Produk::class;
 
+    protected static ?string $slug = 'produk';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Kelola';
+
     protected static ?string $navigationLabel = 'Produk';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::Cube; // contohnya
-
-    // protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::RectangleStack;
 
     public static function form(Schema $schema): Schema
     {

@@ -23,6 +23,7 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+    protected static string|BackedEnum|null $actionNavigationIcon = Heroicon::Users;
 
     protected static ?string $label = 'Pengguna';
 

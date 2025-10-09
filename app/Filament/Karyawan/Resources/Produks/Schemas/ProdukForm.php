@@ -35,6 +35,9 @@ class ProdukForm
                     ->minValue(0)
                     ->default(0),
                 FileUpload::make('image')
+                    ->label('Gambar Produk')
+                    ->disk('public')
+                    ->directory('products')
                     ->image(),
                     Textarea::make('deskripsi')
                     ->required()
